@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emotional Intelligence</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      }
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
+    <style>
+      /* We use two pseudo-elements to allow for a smooth cross-fade transition between backgrounds */
+      body::before, body::after {
+        content: '';
+        position: fixed; /* Fixed position for backgrounds */
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        transition: opacity 0.5s ease-in-out;
+      }
+      
+      /* ::before holds the main (emotion selector) background */
+      body::before {
+        --bg-pattern-light: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle fill="%23000000" cx="10" cy="10" r="1" fill-opacity="0.05"></circle></svg>');
+        --bg-pattern-dark: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle fill="%23ffffff" cx="10" cy="10" r="1" fill-opacity="0.05"></circle></svg>');
+        background-image: var(--bg-pattern-light);
+        opacity: 1;
+      }
+      .dark body::before {
+        background-image: var(--bg-pattern-dark);
+      }
+      
+      /* ::after holds the secondary (strategy view) background */
+      body::after {
+        --bg-strategy-light: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="%239ca3af" d="M0 0h1v40H0zM0 0h40v1H0z" fill-opacity="0.1"></path></svg>');
+        --bg-strategy-dark: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="%23475569" d="M0 0h1v40H0zM0 0h40v1H0z" fill-opacity="0.2"></path></svg>');
+        background-image: var(--bg-strategy-light);
+        opacity: 0; /* Hidden by default */
+      }
+      .dark body::after {
+        background-image: var(--bg-strategy-dark);
+      }
+      
+      /* When the strategy view is active, fade out the main background and fade in the strategy background */
+      body.strategy-view-active::before { opacity: 0; }
+      body.strategy-view-active::after { opacity: 1; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-100 dark:bg-slate-950 transition-colors duration-300 font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
