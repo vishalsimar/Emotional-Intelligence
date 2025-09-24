@@ -17,7 +17,7 @@ interface EditorModalProps {
   onClose: () => void;
 }
 
-const emotionColors = ['red', 'blue', 'purple', 'yellow', 'green', 'orange'];
+const emotionColors = ['red', 'blue', 'purple', 'yellow', 'green', 'orange', 'slate', 'teal', 'indigo', 'stone', 'lime', 'rose', 'cyan', 'sky'];
 
 const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) => {
   const [emotionData, setEmotionData] = useState<Omit<Emotion, 'strategies' | 'helpingOthers'>>({ id: '', name: '', emoji: '', color: 'blue', description: '', relatedWords: [] });

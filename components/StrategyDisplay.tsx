@@ -17,6 +17,14 @@ const emotionTextStyles: { [key: string]: string } = {
   yellow: 'text-yellow-500',
   green: 'text-green-500',
   orange: 'text-orange-500',
+  slate: 'text-slate-500',
+  teal: 'text-teal-500',
+  indigo: 'text-indigo-500',
+  stone: 'text-stone-500',
+  lime: 'text-lime-500',
+  rose: 'text-rose-500',
+  cyan: 'text-cyan-500',
+  sky: 'text-sky-500',
 };
 
 const emotionBorderStyles: { [key: string]: string } = {
@@ -26,6 +34,14 @@ const emotionBorderStyles: { [key: string]: string } = {
   yellow: 'border-yellow-500/50',
   green: 'border-green-500/50',
   orange: 'border-orange-500/50',
+  slate: 'border-slate-500/50',
+  teal: 'border-teal-500/50',
+  indigo: 'border-indigo-500/50',
+  stone: 'border-stone-500/50',
+  lime: 'border-lime-500/50',
+  rose: 'border-rose-500/50',
+  cyan: 'border-cyan-500/50',
+  sky: 'border-sky-500/50',
 };
 
 const GripVerticalIcon = () => (
@@ -62,15 +78,17 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const StrategyCard: React.FC<{ strategy: Strategy; color: string; visible: boolean; delay: number; isDraggable?: boolean; onEdit: () => void; onDelete: () => void; }> = ({ strategy, color, visible, delay, isDraggable = true, onEdit, onDelete }) => {
+const StrategyCard: React.FC<{ strategy: Strategy; color: string; visible: boolean; delay: number; isDraggable?: boolean; isBeingDragged: boolean; onEdit: () => void; onDelete: () => void; }> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete }) => {
     const borderColorClass = emotionBorderStyles[color] || 'border-slate-500';
     return (
         <div 
           style={{ transitionDelay: `${delay}ms` }}
           className={`bg-white dark:bg-slate-800/60 p-5 rounded-lg border-l-4 ${borderColorClass} transition-all duration-300 ease-out shadow-md group
-          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} flex items-start space-x-3`}
+          ${visible ? 'translate-y-0' : 'translate-y-4'}
+          ${isBeingDragged ? 'opacity-40' : 'opacity-100'}
+          flex items-start space-x-3`}
         >
-            {isDraggable && <div className="cursor-grab active:cursor-grabbing touch-none" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
+            {isDraggable && <div className="cursor-grab active:cursor-grabbing touch-none pt-1" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
             <div className="flex-1">
                 <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100">{strategy.title}</h4>
                 <ol className="list-decimal list-inside space-y-2 mt-2 text-slate-600 dark:text-slate-400 text-base">
@@ -108,13 +126,12 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const dragItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
   const dragOverItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
   const [dragOverInfo, setDragOverInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
+  const [draggedInfo, setDraggedInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
     dragItem.current = { category, index };
+    setDraggedInfo({ category, index });
     e.dataTransfer.effectAllowed = 'move';
-     setTimeout(() => {
-        e.currentTarget.classList.add('opacity-50', 'dragging-strategy');
-    }, 0);
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
@@ -133,9 +150,8 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     setDragOverInfo(null);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = () => {
     if (!dragItem.current || !dragOverItem.current || dragItem.current.category !== dragOverItem.current.category) {
-      handleDragEnd(e);
       return;
     }
 
@@ -147,14 +163,13 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     sourceList.splice(dragOverItem.current.index, 0, draggedContent);
     
     onReorderStrategies(emotionId, newStrategies);
-    handleDragEnd(e);
   };
 
-  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragEnd = () => {
     dragItem.current = null;
     dragOverItem.current = null;
     setDragOverInfo(null);
-    document.querySelectorAll('.dragging-strategy').forEach(el => el.classList.remove('opacity-50', 'dragging-strategy'));
+    setDraggedInfo(null);
   };
 
   let cardIndex = 0;
@@ -163,29 +178,38 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     <div>
       <h3 className="text-xl sm:text-2xl font-semibold text-slate-700 dark:text-slate-300 mb-4 pb-2">{title}</h3>
       <div className="flex flex-col space-y-4">
-        {strategies[category].map((strategy, index) => (
-          <div
-            key={strategy.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, category, index)}
-            onDragEnter={(e) => handleDragEnter(e, category, index)}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onDragEnd={handleDragEnd}
-            className={`transition-all duration-200 ${dragOverInfo?.category === category && dragOverInfo?.index === index ? 'pt-2 pb-6' : ''}`}
-          >
-            <StrategyCard
-              strategy={strategy}
-              color={color}
-              visible={visible}
-              delay={(cardIndex++) * 50}
-              isDraggable={true}
-              onEdit={() => onEditStrategyClick(category, strategy)}
-              onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
-            />
-          </div>
-        ))}
+        {strategies[category].map((strategy, index) => {
+          const isBeingDragged = draggedInfo?.category === category && draggedInfo?.index === index;
+          const isDropTarget = dragOverInfo?.category === category && dragOverInfo?.index === index;
+          
+          return (
+            <div
+              key={strategy.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, category, index)}
+              onDragEnter={(e) => handleDragEnter(e, category, index)}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+              className="transition-all duration-200"
+            >
+              {isDropTarget && !isBeingDragged && (
+                <div className="h-1.5 bg-purple-300 dark:bg-purple-700 rounded-full my-2 transition-all" aria-hidden="true" />
+              )}
+              <StrategyCard
+                strategy={strategy}
+                color={color}
+                visible={visible}
+                delay={(cardIndex++) * 50}
+                isDraggable={true}
+                isBeingDragged={isBeingDragged}
+                onEdit={() => onEditStrategyClick(category, strategy)}
+                onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
+              />
+            </div>
+          )
+        })}
          <button onClick={() => onAddStrategyClick(category)} className="mt-2 w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-colors">
             <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
         </button>
@@ -253,6 +277,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 visible={visible}
                 delay={index * 50}
                 isDraggable={false}
+                isBeingDragged={false}
                 onEdit={() => onEditStrategyClick('helpingOthers', strategy)}
                 onDelete={() => onDeleteStrategyClick(emotionId, 'helpingOthers', strategy.id)}
               />
