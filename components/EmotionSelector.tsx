@@ -60,7 +60,12 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ emotions, onSelectEmo
   const dragOverItem = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
+  const [showComplexEmotions, setShowComplexEmotions] = useState(false);
+  
+  // For touch drag
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartTimeout = useRef<number | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsRendered(true), 100);
@@ -83,14 +88,11 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ emotions, onSelectEmo
   };
   
   const handleDragLeave = () => {
-    // Check if the mouse is truly leaving the drop zone, not just entering a child element.
-    // This simple implementation might flicker, but it's often good enough.
-    // For more complex scenarios, you might need to check relatedTarget.
     setDragOverIndex(null);
-  }
+  };
 
   const handleDrop = () => {
-    if (dragItem.current === null || dragOverItem.current === null) return;
+    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) return;
     
     const emotionsCopy = [...emotions];
     const dragItemContent = emotionsCopy[dragItem.current];
@@ -107,69 +109,161 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ emotions, onSelectEmo
     setDraggedIndex(null);
   };
 
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>, index: number) => {
+    if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
+    dragStartTimeout.current = window.setTimeout(() => {
+      dragItem.current = index;
+      setDraggedIndex(index);
+      setIsDragging(true);
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 200);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
+    if (dragStartTimeout.current) {
+        clearTimeout(dragStartTimeout.current);
+        dragStartTimeout.current = null;
+    }
+
+    if (!isDragging || dragItem.current === null) return;
+    
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (!targetElement) return;
+
+    const buttonElement = targetElement.closest('button[draggable]');
+    if (!buttonElement || !gridRef.current) return;
+    
+    const children = Array.from(gridRef.current.children).filter((el: Element) => el.hasAttribute('draggable'));
+    const overIndex = children.indexOf(buttonElement);
+
+    if (overIndex !== -1 && overIndex !== dragOverItem.current) {
+        const draggableButtons = Array.from(gridRef.current.querySelectorAll('button[draggable]'));
+        const trueIndex = draggableButtons.indexOf(buttonElement);
+        if (trueIndex !== -1) {
+          dragOverItem.current = trueIndex;
+          setDragOverIndex(trueIndex);
+        }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragStartTimeout.current) {
+        clearTimeout(dragStartTimeout.current);
+        dragStartTimeout.current = null;
+    }
+
+    if (isDragging) {
+        handleDrop();
+    }
+    
+    handleDragEnd();
+    
+    setTimeout(() => {
+        setIsDragging(false);
+    }, 50);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, emotion: Emotion) => {
+    if (isDragging) {
+        e.preventDefault();
+        return;
+    }
+    onSelectEmotion(emotion);
+  };
+
+  // FIX: Explicitly typing EmotionCard as a React.FC to resolve type errors with the 'key' prop.
+  const EmotionCard: React.FC<{ emotion: Emotion; index: number }> = ({ emotion, index }) => {
+    const isBeingDragged = draggedIndex === index;
+    const isDropTarget = dragOverIndex === index && !isBeingDragged;
+
+    return (
+      <button
+        onClick={(e) => handleClick(e, emotion)}
+        draggable
+        onDragStart={(e) => handleDragStart(e, index)}
+        onDragEnter={(e) => handleDragEnter(e, index)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onTouchStart={(e) => handleTouchStart(e, index)}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        style={{ transitionDelay: `${index * 50}ms`, touchAction: 'none' }}
+        className={`p-4 bg-white dark:bg-slate-800/50 rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-950 text-center border group relative
+        ${emotionColorStyles[emotion.color] || 'bg-slate-100 border-slate-200'}
+        ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+        ${isBeingDragged ? 'opacity-40 scale-105 shadow-2xl' : ''}
+        ${isDropTarget ? 'scale-105 shadow-2xl ring-2 ring-purple-500 ring-offset-2 dark:ring-offset-slate-950' : ''}
+        `}
+        aria-label={`Select ${emotion.name} or drag to reorder`}
+      >
+        <div className="absolute top-2 left-2 cursor-grab active:cursor-grabbing p-1 z-10">
+            <GripVerticalIcon />
+        </div>
+        <div className="absolute top-2 right-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+            <button 
+                onClick={(e) => { e.stopPropagation(); onEditClick(emotion); }}
+                className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50 rounded-full"
+                aria-label={`Edit ${emotion.name}`}
+            >
+                <EditIcon className="w-4 h-4" />
+            </button>
+            <button 
+                onClick={(e) => { e.stopPropagation(); onDeleteClick(emotion.id); }}
+                className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-full"
+                aria-label={`Delete ${emotion.name}`}
+            >
+                <TrashIcon className="w-4 h-4" />
+            </button>
+        </div>
+        <div className="text-5xl sm:text-6xl mb-2 pt-8">{emotion.emoji}</div>
+        <div className="font-bold text-lg sm:text-xl text-slate-900 dark:text-slate-100">{emotion.name}</div>
+        <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 h-8">
+          {emotion.relatedWords.join(', ')}
+        </div>
+      </button>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800 dark:text-slate-200 mb-8 text-center">How are you feeling right now?</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full pb-20">
-        {emotions.map((emotion, index) => {
-          const isDividerPosition = index === 6;
-          const isBeingDragged = draggedIndex === index;
-          const isDropTarget = dragOverIndex === index && !isBeingDragged;
+      <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800 dark:text-slate-200 mb-2">How are you feeling?</h2>
+      <p className="text-slate-600 dark:text-slate-400 mb-8 text-center">Select a feeling to explore management strategies.</p>
+      
+      <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full pb-20">
+        {emotions.slice(0, 6).map((emotion, index) => (
+          <EmotionCard key={emotion.id} emotion={emotion} index={index} />
+        ))}
+        
+        {emotions.length > 6 && (
+          <div className="col-span-2 md:col-span-3 mt-8 mb-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-slate-300 dark:border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center">
+                  <button
+                    onClick={() => setShowComplexEmotions(prev => !prev)}
+                    className="bg-slate-100 dark:bg-slate-950 px-4 py-2 text-lg font-medium text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center"
+                    aria-expanded={showComplexEmotions}
+                    aria-controls="complex-emotions-grid"
+                  >
+                    Complex Emotions
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`ml-2 h-5 w-5 text-slate-500 transition-transform transform ${showComplexEmotions ? 'rotate-180' : ''}`} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-          return (
-            <React.Fragment key={emotion.id}>
-              {isDividerPosition && (
-                 <div className="col-span-2 md:col-span-3 mt-4 mb-2 flex items-center">
-                   <div className="flex-grow border-t border-slate-300 dark:border-slate-700"></div>
-                   <h3 className="flex-shrink-0 px-4 text-lg font-semibold text-slate-600 dark:text-slate-400">Complex Emotions</h3>
-                   <div className="flex-grow border-t border-slate-300 dark:border-slate-700"></div>
-                 </div>
-              )}
-              <button
-                onClick={() => onSelectEmotion(emotion)}
-                draggable
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragEnter={(e) => handleDragEnter(e, index)}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
-                style={{ transitionDelay: `${index * 75}ms` }}
-                className={`p-4 bg-white dark:bg-slate-800/50 rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-950 text-center border group relative
-                ${emotionColorStyles[emotion.color] || 'bg-slate-100 border-slate-200'}
-                ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-                ${isBeingDragged ? 'opacity-40' : ''}
-                ${isDropTarget ? 'scale-105 shadow-2xl ring-2 ring-purple-500 ring-offset-2 dark:ring-offset-slate-950' : ''}
-                `}
-                aria-label={`Select ${emotion.name} or drag to reorder`}
-              >
-                <div className="absolute top-2 left-2 cursor-grab active:cursor-grabbing p-1 z-10">
-                    <GripVerticalIcon />
-                </div>
-                <div className="absolute top-2 right-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onEditClick(emotion); }}
-                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50 rounded-full"
-                        aria-label={`Edit ${emotion.name}`}
-                    >
-                        <EditIcon className="w-4 h-4" />
-                    </button>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onDeleteClick(emotion.id); }}
-                        className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-full"
-                        aria-label={`Delete ${emotion.name}`}
-                    >
-                        <TrashIcon className="w-4 h-4" />
-                    </button>
-                </div>
-                <div className="text-5xl sm:text-6xl mb-2 pt-8">{emotion.emoji}</div>
-                <div className="font-bold text-lg sm:text-xl text-slate-900 dark:text-slate-100">{emotion.name}</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 h-8">
-                  {emotion.relatedWords.join(', ')}
-                </div>
-              </button>
-            </React.Fragment>
-          );
+        {showComplexEmotions && emotions.slice(6).map((emotion, i) => {
+          const index = i + 6;
+          return <EmotionCard key={emotion.id} emotion={emotion} index={index} />;
         })}
       </div>
     </div>

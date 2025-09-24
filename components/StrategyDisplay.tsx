@@ -84,7 +84,7 @@ const StrategyCard: React.FC<{ strategy: Strategy; color: string; visible: boole
         <div 
           style={{ transitionDelay: `${delay}ms` }}
           className={`bg-white dark:bg-slate-800/60 p-5 rounded-lg border-l-4 ${borderColorClass} transition-all duration-300 ease-out shadow-md group
-          ${visible ? 'translate-y-0' : 'translate-y-4'}
+          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
           ${isBeingDragged ? 'opacity-40' : 'opacity-100'}
           flex items-start space-x-3`}
         >
@@ -128,6 +128,10 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const [dragOverInfo, setDragOverInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
   const [draggedInfo, setDraggedInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
 
+  // Touch Drag State
+  const dragStartTimeout = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
     dragItem.current = { category, index };
     setDraggedInfo({ category, index });
@@ -145,15 +149,15 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
-
-  const handleDragLeave = () => {
+  const handleDragLeave = () => setDragOverInfo(null);
+  const handleDragEnd = () => {
+    dragItem.current = null;
+    dragOverItem.current = null;
     setDragOverInfo(null);
+    setDraggedInfo(null);
   };
-
   const handleDrop = () => {
-    if (!dragItem.current || !dragOverItem.current || dragItem.current.category !== dragOverItem.current.category) {
-      return;
-    }
+    if (!dragItem.current || !dragOverItem.current || dragItem.current.category !== dragOverItem.current.category || (dragItem.current.index === dragOverItem.current.index)) return;
 
     const newStrategies = JSON.parse(JSON.stringify(emotion.strategies)); // Deep copy
     const sourceList = newStrategies[dragItem.current.category];
@@ -165,20 +169,56 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     onReorderStrategies(emotionId, newStrategies);
   };
 
-  const handleDragEnd = () => {
-    dragItem.current = null;
-    dragOverItem.current = null;
-    setDragOverInfo(null);
-    setDraggedInfo(null);
+    // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
+    if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
+    dragStartTimeout.current = window.setTimeout(() => {
+        dragItem.current = { category, index };
+        setDraggedInfo({ category, index });
+        isDraggingRef.current = true;
+        if (navigator.vibrate) navigator.vibrate(50);
+    }, 200);
   };
 
-  let cardIndex = 0;
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
+    if (!isDraggingRef.current || !dragItem.current) return;
 
-  const renderStrategyList = (category: StrategyCategory, title: string) => (
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!targetElement) return;
+
+    const draggableDiv = targetElement.closest('[data-drag-category]');
+    if (!draggableDiv) return;
+
+    const category = draggableDiv.getAttribute('data-drag-category') as StrategyCategory;
+    const index = parseInt(draggableDiv.getAttribute('data-drag-index') || '-1', 10);
+    
+    if (index !== -1 && dragItem.current?.category === category) {
+        if (index !== dragOverItem.current?.index || category !== dragOverItem.current?.category) {
+            dragOverItem.current = { category, index };
+            setDragOverInfo({ category, index });
+        }
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
+    if (isDraggingRef.current) handleDrop();
+    handleDragEnd();
+    isDraggingRef.current = false;
+  };
+
+  const StrategyCategoryList: React.FC<{
+    category: StrategyCategory;
+    title: string;
+    strategies: Strategy[];
+    itemOffset: number;
+  }> = ({ category, title, strategies, itemOffset }) => (
     <div>
-      <h3 className="text-xl sm:text-2xl font-semibold text-slate-700 dark:text-slate-300 mb-4 pb-2">{title}</h3>
+      <h3 className="text-2xl font-semibold text-slate-700 dark:text-slate-300 mb-6">{title}</h3>
       <div className="flex flex-col space-y-4">
-        {strategies[category].map((strategy, index) => {
+        {strategies.map((strategy, index) => {
           const isBeingDragged = draggedInfo?.category === category && draggedInfo?.index === index;
           const isDropTarget = dragOverInfo?.category === category && dragOverInfo?.index === index;
           
@@ -192,6 +232,13 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onDragEnd={handleDragEnd}
+              onTouchStart={(e) => handleTouchStart(e, category, index)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+              data-drag-category={category}
+              data-drag-index={index}
+              style={{ touchAction: 'none' }}
               className="transition-all duration-200"
             >
               {isDropTarget && !isBeingDragged && (
@@ -201,7 +248,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 strategy={strategy}
                 color={color}
                 visible={visible}
-                delay={(cardIndex++) * 50}
+                delay={(itemOffset + index) * 50}
                 isDraggable={true}
                 isBeingDragged={isBeingDragged}
                 onEdit={() => onEditStrategyClick(category, strategy)}
@@ -260,9 +307,24 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
 
       {activeTab === 'me' && (
         <div className="space-y-10 animate-fade-in-content">
-          {renderStrategyList('immediate', '⚡️ Immediate (Right Now)')}
-          {renderStrategyList('shortTerm', '🗓️ Short-Term (Today & This Week)')}
-          {renderStrategyList('longTerm', '🧠 Long-Term (Building Resilience)')}
+          <StrategyCategoryList
+            category="immediate"
+            title="⚡️ Immediate Strategies"
+            strategies={strategies.immediate}
+            itemOffset={0}
+          />
+          <StrategyCategoryList
+            category="shortTerm"
+            title="🗓️ Short-Term Strategies"
+            strategies={strategies.shortTerm}
+            itemOffset={strategies.immediate.length}
+          />
+          <StrategyCategoryList
+            category="longTerm"
+            title="🧠 Long-Term Strategies"
+            strategies={strategies.longTerm}
+            itemOffset={strategies.immediate.length + strategies.shortTerm.length}
+          />
         </div>
       )}
 
@@ -294,20 +356,10 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
 
 const style = document.createElement('style');
 style.innerHTML = `
-@keyframes fade-in {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
-}
-@keyframes fade-in-content {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-.animate-fade-in-content {
-  animation: fade-in-content 0.4s ease-out forwards;
-}
+@keyframes fade-in { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+@keyframes fade-in-content { 0% { opacity: 0; } 100% { opacity: 1; } }
+.animate-fade-in-content { animation: fade-in-content 0.4s ease-out forwards; }
 `;
 document.head.appendChild(style);
 

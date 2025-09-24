@@ -193,7 +193,14 @@ const App: React.FC = () => {
   });
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            return 'dark';
+        }
+    }
+    return 'light';
+  });
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
 
   useEffect(() => {
