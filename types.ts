@@ -18,3 +18,12 @@ export interface Emotion {
   };
   helpingOthers: Strategy[];
 }
+
+export interface EmotionLog {
+  logId: string;
+  emotionId: string;
+  emotionName: string;
+  emotionEmoji: string;
+  emotionColor: string;
+  timestamp: number;
+}

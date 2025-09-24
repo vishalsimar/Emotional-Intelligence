@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect, FormEvent } from 'react';
 import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
-import { Emotion, Strategy } from './types';
+import HistoryView from './components/HistoryView';
+import { Emotion, Strategy, EmotionLog } from './types';
 import { EMOTIONS } from './constants';
 
 // Inlined EditorModal to avoid creating a new file
@@ -180,6 +181,12 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const ClockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <polyline points="12 6 12 12 16 14"></polyline>
+  </svg>
+);
 
 const App: React.FC = () => {
   const [emotions, setEmotions] = useState<Emotion[]>(() => {
@@ -191,7 +198,17 @@ const App: React.FC = () => {
       return EMOTIONS;
     }
   });
+  const [history, setHistory] = useState<EmotionLog[]>(() => {
+    try {
+      const savedHistory = localStorage.getItem('emotionHistory');
+      return savedHistory ? JSON.parse(savedHistory) : [];
+    } catch (error) {
+      console.error("Failed to parse history from localStorage", error);
+      return [];
+    }
+  });
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
+  const [view, setView] = useState<'selector' | 'strategy' | 'history'>('selector');
   const [isLeaving, setIsLeaving] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -208,6 +225,10 @@ const App: React.FC = () => {
   }, [emotions]);
 
   useEffect(() => {
+    localStorage.setItem('emotionHistory', JSON.stringify(history));
+  }, [history]);
+
+  useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -217,20 +238,31 @@ const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (selectedEmotion) {
+    if (view === 'strategy' || view === 'history') {
       document.body.classList.add('strategy-view-active');
     } else {
       document.body.classList.remove('strategy-view-active');
     }
-  }, [selectedEmotion]);
+  }, [view]);
   
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'dark' ? 'light' : 'dark'));
   };
 
   const handleSelectEmotion = useCallback((emotion: Emotion) => {
+    const newLog: EmotionLog = {
+      logId: `log-${Date.now()}`,
+      emotionId: emotion.id,
+      emotionName: emotion.name,
+      emotionEmoji: emotion.emoji,
+      emotionColor: emotion.color,
+      timestamp: Date.now(),
+    };
+    setHistory(prev => [newLog, ...prev]);
+
     const currentEmotionState = emotions.find(e => e.id === emotion.id) || emotion;
     setSelectedEmotion(currentEmotionState);
+    setView('strategy');
   }, [emotions]);
 
   const handleGoBack = useCallback(() => {
@@ -238,6 +270,7 @@ const App: React.FC = () => {
     setTimeout(() => {
       setSelectedEmotion(null);
       setIsLeaving(false);
+      setView('selector');
     }, 300);
   }, []);
   
@@ -257,6 +290,12 @@ const App: React.FC = () => {
         setSelectedEmotion(prev => prev ? { ...prev, strategies: newStrategies } : null);
     }
   }, [emotions, selectedEmotion]);
+
+  const handleClearHistory = () => {
+    if (window.confirm('Are you sure you want to delete your entire emotion history? This cannot be undone.')) {
+        setHistory([]);
+    }
+  };
 
   // --- CRUD Handlers ---
   const handleDeleteEmotion = (emotionId: string) => {
@@ -341,19 +380,28 @@ const App: React.FC = () => {
                 <p className="text-slate-600 dark:text-slate-400 text-xs hidden sm:block">An emotional management toolkit.</p>
               </div>
             </div>
-            <button
-              onClick={toggleTheme}
-              className="flex-shrink-0 p-2 rounded-full text-slate-500 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 focus:ring-purple-500 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setView('history')}
+                className="flex-shrink-0 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 focus:ring-purple-500 transition-colors"
+                aria-label="View emotion history"
+              >
+                <ClockIcon />
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="flex-shrink-0 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 focus:ring-purple-500 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+              </button>
+            </div>
           </div>
         </header>
         
         <main className="w-full max-w-5xl mx-auto flex-grow p-4 sm:p-6 md:p-8">
           <div className="relative w-full">
-            <div className={`transition-opacity duration-300 ease-in-out ${selectedEmotion ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`transition-opacity duration-300 ease-in-out ${view !== 'selector' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <EmotionSelector 
                 emotions={emotions} 
                 onSelectEmotion={handleSelectEmotion} 
@@ -362,7 +410,7 @@ const App: React.FC = () => {
                 onDeleteClick={handleDeleteEmotion}
               />
             </div>
-            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${selectedEmotion && !isLeaving ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'strategy' && !isLeaving ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               {selectedEmotion && (
                 <StrategyDisplay 
                   key={selectedEmotion.id} // Re-mount when emotion changes to reset animations
@@ -375,11 +423,20 @@ const App: React.FC = () => {
                 />
               )}
             </div>
+             <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'history' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              {view === 'history' && (
+                <HistoryView 
+                  history={history}
+                  onBack={() => setView('selector')}
+                  onClearHistory={handleClearHistory}
+                />
+              )}
+            </div>
           </div>
         </main>
       </div>
 
-      {!selectedEmotion && (
+      {view === 'selector' && (
         <button 
             onClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
             className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-lg z-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-950 focus:ring-purple-500 transition-transform transform active:scale-95"
