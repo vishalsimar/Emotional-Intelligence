@@ -7,23 +7,6 @@ interface HistoryViewProps {
   onClearHistory: () => void;
 }
 
-const emotionBorderStyles: { [key: string]: string } = {
-  red: 'border-red-500/50',
-  blue: 'border-blue-500/50',
-  purple: 'border-purple-500/50',
-  yellow: 'border-yellow-500/50',
-  green: 'border-green-500/50',
-  orange: 'border-orange-500/50',
-  slate: 'border-slate-500/50',
-  teal: 'border-teal-500/50',
-  indigo: 'border-indigo-500/50',
-  stone: 'border-stone-500/50',
-  lime: 'border-lime-500/50',
-  rose: 'border-rose-500/50',
-  cyan: 'border-cyan-500/50',
-  sky: 'border-sky-500/50',
-};
-
 const TrashIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <polyline points="3 6 5 6 21 6"></polyline>
@@ -66,19 +49,19 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
                 <div className="flex items-center">
                     <button
                         onClick={onBack}
-                        className="mr-2 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
+                        className="mr-2 p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors"
                         aria-label="Go back to emotion selection"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
                     </button>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 dark:text-slate-200">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)]">
                         Emotion History
                     </h2>
                 </div>
                 {history.length > 0 && (
                     <button 
                         onClick={onClearHistory}
-                        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-500 bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 rounded-md transition-colors"
+                        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-[var(--color-red-text)] bg-[var(--color-red-bg)] hover:bg-[var(--color-red-hover-bg)] rounded-md transition-colors"
                         aria-label="Clear all history"
                     >
                         <TrashIcon className="w-4 h-4" />
@@ -91,7 +74,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
                 <div className="space-y-8">
                     {dateKeys.map(dateString => (
                         <section key={dateString} aria-labelledby={`date-heading-${dateString.replace(/\s/g, '-')}`}>
-                            <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                            <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2 border-b border-[var(--border-primary)]">
                                 {dateString}
                             </h3>
                             <ul className="space-y-3">
@@ -101,14 +84,14 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
                                         className="animate-fade-in-item"
                                         style={{ animationDelay: `${index * 30}ms` }}
                                     >
-                                        <div className={`bg-white dark:bg-slate-800/60 p-4 rounded-lg border-l-4 ${emotionBorderStyles[log.emotionColor] || 'border-slate-500/50'} shadow-sm flex items-center justify-between`}>
+                                        <div className={`bg-[var(--bg-secondary)] p-4 rounded-lg border-l-4 border-[var(--color-${log.emotionColor}-border)] shadow-sm flex items-center justify-between`}>
                                             <div className="flex items-center space-x-4">
                                                 <span className="text-3xl">{log.emotionEmoji}</span>
                                                 <div>
-                                                    <p className="font-semibold text-slate-800 dark:text-slate-100">{log.emotionName}</p>
+                                                    <p className="font-semibold text-[var(--text-primary)]">{log.emotionName}</p>
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            <p className="text-sm text-[var(--text-secondary)]">
                                                 {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -121,8 +104,8 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
             ) : (
                 <div className="text-center py-20 px-4">
                     <p className="text-4xl mb-4">🗂️</p>
-                    <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300">No History Yet</h3>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2">Your logged emotions will appear here once you select them from the main screen.</p>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)]/80">No History Yet</h3>
+                    <p className="text-[var(--text-secondary)] mt-2">Your logged emotions will appear here once you select them from the main screen.</p>
                 </div>
             )}
         </div>

@@ -2,8 +2,10 @@ import React, { useState, useCallback, useEffect, FormEvent } from 'react';
 import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
 import HistoryView from './components/HistoryView';
+import ThemePicker from './components/ThemePicker';
 import { Emotion, Strategy, EmotionLog } from './types';
 import { EMOTIONS } from './constants';
+import { useTheme } from './hooks/useTheme';
 
 // Inlined EditorModal to avoid creating a new file
 export type ModalConfig = 
@@ -76,28 +78,28 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
     <>
       <div className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Name</label>
-          <input type="text" id="name" value={emotionData.name} onChange={e => setEmotionData({...emotionData, name: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required />
+          <label htmlFor="name" className="block text-sm font-medium text-[var(--text-secondary)]">Name</label>
+          <input type="text" id="name" value={emotionData.name} onChange={e => setEmotionData({...emotionData, name: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" required />
         </div>
         <div className="flex gap-4">
             <div className="flex-1">
-                <label htmlFor="emoji" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Icon (Emoji)</label>
-                <input type="text" id="emoji" value={emotionData.emoji} onChange={e => setEmotionData({...emotionData, emoji: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required />
+                <label htmlFor="emoji" className="block text-sm font-medium text-[var(--text-secondary)]">Icon (Emoji)</label>
+                <input type="text" id="emoji" value={emotionData.emoji} onChange={e => setEmotionData({...emotionData, emoji: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" required />
             </div>
             <div>
-                <label htmlFor="color" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Color</label>
-                <select id="color" value={emotionData.color} onChange={e => setEmotionData({...emotionData, color: e.target.value})} className="mt-1 block w-full pl-3 pr-10 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                <label htmlFor="color" className="block text-sm font-medium text-[var(--text-secondary)]">Color</label>
+                <select id="color" value={emotionData.color} onChange={e => setEmotionData({...emotionData, color: e.target.value})} className="mt-1 block w-full pl-3 pr-10 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]">
                     {emotionColors.map(color => <option key={color} value={color} className="capitalize">{color}</option>)}
                 </select>
             </div>
         </div>
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Description</label>
-          <textarea id="description" value={emotionData.description} onChange={e => setEmotionData({...emotionData, description: e.target.value})} rows={2} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"></textarea>
+          <label htmlFor="description" className="block text-sm font-medium text-[var(--text-secondary)]">Description</label>
+          <textarea id="description" value={emotionData.description} onChange={e => setEmotionData({...emotionData, description: e.target.value})} rows={2} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]"></textarea>
         </div>
         <div>
-          <label htmlFor="relatedWords" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Related Words (comma-separated)</label>
-          <input type="text" id="relatedWords" value={relatedWordsStr} onChange={e => setRelatedWordsStr(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" />
+          <label htmlFor="relatedWords" className="block text-sm font-medium text-[var(--text-secondary)]">Related Words (comma-separated)</label>
+          <input type="text" id="relatedWords" value={relatedWordsStr} onChange={e => setRelatedWordsStr(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" />
         </div>
       </div>
     </>
@@ -107,12 +109,12 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
     <>
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Title</label>
-          <input type="text" id="title" value={strategyData.title} onChange={e => setStrategyData({...strategyData, title: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required />
+          <label htmlFor="title" className="block text-sm font-medium text-[var(--text-secondary)]">Title</label>
+          <input type="text" id="title" value={strategyData.title} onChange={e => setStrategyData({...strategyData, title: e.target.value})} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" required />
         </div>
         <div>
-          <label htmlFor="steps" className="block text-sm font-medium text-slate-600 dark:text-slate-300">Steps (one per line)</label>
-          <textarea id="steps" value={stepsStr} onChange={e => setStepsStr(e.target.value)} rows={4} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"></textarea>
+          <label htmlFor="steps" className="block text-sm font-medium text-[var(--text-secondary)]">Steps (one per line)</label>
+          <textarea id="steps" value={stepsStr} onChange={e => setStepsStr(e.target.value)} rows={4} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]"></textarea>
         </div>
       </div>
     </>
@@ -126,12 +128,12 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
         role="dialog"
     >
       <div 
-        className="bg-white dark:bg-slate-900 w-full h-full sm:h-auto sm:max-w-md sm:rounded-lg sm:shadow-xl flex flex-col transition-transform transform scale-100"
+        className="bg-[var(--bg-tertiary)] w-full h-full sm:h-auto sm:max-w-md sm:rounded-lg sm:shadow-xl flex flex-col transition-transform transform scale-100"
         onClick={e => e.stopPropagation()}
       >
-        <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
-            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">{getTitle()}</h3>
-            <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">
+        <header className="flex items-center justify-between p-4 border-b border-[var(--border-primary)] flex-shrink-0">
+            <h3 className="text-xl font-semibold text-[var(--text-primary)]">{getTitle()}</h3>
+            <button onClick={onClose} className="p-1 rounded-full text-slate-400 hover:bg-[var(--bg-hover)]" aria-label="Close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </header>
@@ -139,11 +141,11 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
           <main className="p-6 overflow-y-auto">
             {config.type === 'emotion' ? renderEmotionForm() : renderStrategyForm()}
           </main>
-          <footer className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-3 flex-shrink-0">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+          <footer className="p-4 bg-[var(--bg-secondary)]/50 border-t border-[var(--border-primary)] flex justify-end space-x-3 flex-shrink-0">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-hover)] border border-[var(--border-secondary)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-ring)]">
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-ring)]">
               Save
             </button>
           </footer>
@@ -153,26 +155,6 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
   );
 };
 
-
-const SunIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-  </svg>
-);
-
-const MoonIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-);
 
 const PlusIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -210,14 +192,7 @@ const App: React.FC = () => {
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [view, setView] = useState<'selector' | 'strategy' | 'history'>('selector');
   const [isLeaving, setIsLeaving] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            return 'dark';
-        }
-    }
-    return 'light';
-  });
+  const { themeId, setThemeId, currentTheme } = useTheme();
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
 
   useEffect(() => {
@@ -229,25 +204,12 @@ const App: React.FC = () => {
   }, [history]);
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     if (view === 'strategy' || view === 'history') {
       document.body.classList.add('strategy-view-active');
     } else {
       document.body.classList.remove('strategy-view-active');
     }
   }, [view]);
-  
-  const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'dark' ? 'light' : 'dark'));
-  };
 
   const handleSelectEmotion = useCallback((emotion: Emotion) => {
     const newLog: EmotionLog = {
@@ -368,33 +330,27 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full text-slate-900 dark:text-white font-sans flex flex-col">
-        <header className="w-full bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 p-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="min-h-screen w-full text-[var(--text-primary)] font-sans flex flex-col">
+        <header className="w-full bg-[var(--bg-secondary)] shadow-sm sticky top-0 z-10 p-4 border-b border-[var(--border-primary)]">
           <div className="max-w-5xl mx-auto flex justify-between items-center">
             <div className="text-left flex items-center gap-3">
               <img src="/icon.svg" className="w-8 h-8" alt="App Logo" />
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
                   Emotional Intelligence
                 </h1>
-                <p className="text-slate-600 dark:text-slate-400 text-xs hidden sm:block">An emotional management toolkit.</p>
+                <p className="text-[var(--text-secondary)] text-xs hidden sm:block">An emotional management toolkit.</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setView('history')}
-                className="flex-shrink-0 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 focus:ring-purple-500 transition-colors"
+                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="View emotion history"
               >
                 <ClockIcon />
               </button>
-              <button
-                onClick={toggleTheme}
-                className="flex-shrink-0 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 focus:ring-purple-500 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-              </button>
+              <ThemePicker selectedThemeId={themeId} onThemeChange={setThemeId} />
             </div>
           </div>
         </header>
@@ -439,7 +395,7 @@ const App: React.FC = () => {
       {view === 'selector' && (
         <button 
             onClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
-            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-lg z-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-950 focus:ring-purple-500 transition-transform transform active:scale-95"
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--text-on-accent)] rounded-full p-4 shadow-lg z-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] transition-transform transform active:scale-95"
             aria-label="Add new emotion"
         >
             <PlusIcon className="w-6 h-6" />
