@@ -180,7 +180,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
-        style={{ transitionDelay: `${index * 50}ms`, touchAction: 'none' }}
+        style={{ transitionDelay: `${index * 50}ms`, touchAction: isDragging ? 'none' : 'pan-y' }}
         className={`p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative
         ${colorClasses}
         ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
