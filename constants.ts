@@ -183,158 +183,62 @@ const ALL_EMOTIONS: Emotion[] = [
   },
   {
     id: 'emotion-7',
-    name: 'Guilt',
-    emoji: '🟤',
-    color: 'stone',
-    description: 'A feeling of responsibility or remorse for a perceived offense, real or imagined.',
-    relatedWords: ['Remorse', 'Regret', 'Self-reproach'],
+    name: 'Anticipation',
+    emoji: '⚪️',
+    color: 'teal',
+    description: 'A feeling of expectation about a future event, which can be experienced as excitement or anxiety.',
+    relatedWords: ['Expectation', 'Excitement', 'Dread', 'Suspense'],
     strategies: {
       immediate: [
-        { id: 's7-1', title: 'Acknowledge Without Judgment', steps: ['Notice the feeling of guilt.', 'Say to yourself, "I am feeling guilt," instead of "I am guilty."', 'This separates the feeling from your identity.'] },
-        { id: 's7-2', title: 'Fact-Check Your Guilt', steps: ['Ask: "Did I actually do something wrong, or do I just feel like I did?"', '"What is the evidence for my responsibility?"', 'Separate appropriate guilt (I did something wrong) from inappropriate guilt (I feel responsible for things outside my control).'] },
+        { id: 's7-1', title: 'Mindful Breathing', steps: ['Focus on the physical sensation of your breath.', 'Breathe in for 4, hold for 4, out for 6.', 'This anchors you in the present, away from future worries.'] },
+        { id: 's7-2', title: 'Challenge Catastrophic Thinking', steps: ['Ask yourself: "What is the worst that could happen?"', '"What is the best?"', '"What is most likely to happen?"', 'This CBT technique provides perspective.'] },
+        { id: 's7-3', title: 'Engage Your Senses', steps: ['Use the 5-4-3-2-1 grounding technique.', 'Notice 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.', 'This pulls your focus from anxious thoughts to your immediate environment.'] },
       ],
       shortTerm: [
-        { id: 's7-3', title: 'Make Amends (If Appropriate)', steps: ['If you harmed someone, consider a sincere apology.', 'Think about what you can do to repair the situation.', 'Taking reparative action can resolve feelings of guilt.'] },
-        { id: 's7-4', title: 'Practice Self-Compassion', steps: ['Talk to yourself as you would a friend who made a mistake.', 'Acknowledge that everyone makes mistakes.', 'Remind yourself that one action does not define your entire character.'] },
+        { id: 's7-4', title: 'Channel Energy into Planning', steps: ['If feeling excited, create a plan or checklist.', 'If feeling anxious, identify one small, controllable preparatory step.', 'Action provides a sense of agency and reduces helplessness.'] },
+        { id: 's7-5', title: 'Schedule "Worry Time"', steps: ['Set aside a specific 15-minute window to consciously think about your worries.', 'Outside of this time, gently redirect your thoughts.', 'This contains anxiety so it doesn\'t dominate your day.'] },
+        { id: 's7-6', title: 'Gather Necessary Information', steps: ['Uncertainty fuels anxious anticipation.', 'Identify what you don\'t know and find factual answers.', 'Reducing ambiguity can significantly lower anxiety.'] },
       ],
       longTerm: [
-        { id: 's7-5', title: 'Learn From the Mistake', steps: ['Identify what you can do differently next time.', 'View guilt as a signal that you violated one of your values.', 'Use it as a guide for future behavior, turning a negative into a positive.'] },
-        { id: 's7-6', title: 'Practice Self-Forgiveness', steps: ['Write a letter of forgiveness to yourself.', 'Recognize that holding onto guilt can be a form of self-punishment that is no longer productive.', 'Letting go allows you to move forward.'] },
+        { id: 's7-7', title: 'Cultivate a Growth Mindset', steps: ['View potential challenges not as threats, but as opportunities to learn and grow.', 'This reframes dread into a manageable challenge.', 'Focus on effort and learning rather than a fixed outcome.'] },
+        { id: 's7-8', title: 'Practice Mindfulness Meditation', steps: ['Regular practice strengthens your ability to observe thoughts without getting entangled in them.', 'This helps you see anticipatory thoughts as just thoughts, not reality.'] },
+        { id: 's7-9', title: 'Focus on Process, Not Outcome', steps: ['Set goals related to the steps you can control.', 'For a presentation, focus on preparing well, not on receiving applause.', 'This reduces pressure and outcome-dependent anxiety.'] },
       ],
     },
     helpingOthers: [
-      { id: 'ho7-1', title: 'Listen and Validate', steps: ['Let them express their feelings without trying to dismiss them.', 'Say things like "That sounds really difficult to carry."', 'Avoid saying "Don\'t feel guilty" or "It wasn\'t a big deal."'] },
-      { id: 'ho7-2', title: 'Separate the Person from the Behavior', steps: ['Remind them that making a mistake does not make them a bad person.', 'Help them see their inherent worth outside of this one action.', 'Focus on their positive qualities.'] },
+      { id: 'ho7-1', title: 'Validate, Don\'t Dismiss', steps: ['Acknowledge their feeling: "It makes sense that you\'re feeling nervous about the interview."', 'Avoid saying "Don\'t worry" or "It will be fine."', 'Validation builds connection and safety.'] },
+      { id: 'ho7-2', title: 'Help Them Externalize and Plan', steps: ['Ask, "What are all the things on your mind about this?"', 'Help them identify one small, actionable step they can take.', 'This shifts them from worrying to problem-solving.'] },
+      { id: 'ho7-3', title: 'Offer a Healthy Distraction', steps: ['Suggest an engaging activity that is unrelated to the source of anticipation.', 'Going for a walk, watching a movie, or playing a game can provide a mental break.'] },
     ],
   },
   {
     id: 'emotion-8',
-    name: 'Envy',
-    emoji: '🟩',
-    color: 'lime',
-    description: "The painful feeling of wanting what someone else has (e.g., their success, possessions, or qualities). Envy is a two-person situation: You and the person you envy. It's about wanting something you lack.",
-    relatedWords: ['Covetousness', 'Resentment', 'Longing'],
-    strategies: {
-      immediate: [
-        { id: 's8-1', title: 'Name It to Tame It', steps: ['Acknowledge the feeling: "I am feeling envy right now."', 'Don\'t judge yourself for feeling it; it\'s a common human emotion.', 'Observing it reduces its power.'] },
-        { id: 's8-2', title: 'Shift to Gratitude', steps: ['Quickly name three things in your own life you are grateful for.', 'This can be anything, big or small.', 'It\'s hard to feel envious and grateful at the exact same moment.'] },
-      ],
-      shortTerm: [
-        { id: 's8-3', title: 'Limit Social Media Exposure', steps: ['Recognize that social media often shows a curated highlight reel.', 'If a particular account is a trigger, mute or unfollow it for a while.', 'Protect your mental space.'] },
-        { id: 's8-4', title: 'Use Envy as a Compass', steps: ['Ask yourself: "What is my envy telling me that I want?"', 'Use this information to clarify your own goals and aspirations.', 'Let it be a source of motivation, not misery.'] },
-      ],
-      longTerm: [
-        { id: 's8-5', title: 'Practice "Mudita" (Sympathetic Joy)', steps: ['Actively practice feeling happy for others\' successes.', 'Start small, with people you aren\'t envious of.', 'This rewires your brain to see others\' good fortune as a positive, not a threat.'] },
-        { id: 's8-6', title: 'Focus on Your Own Journey', steps: ['Remind yourself that comparison is the thief of joy.', 'Regularly review your own progress and accomplishments.', 'Compete with who you were yesterday, not with who someone else is today.'] },
-      ],
-    },
-    helpingOthers: [
-      { id: 'ho8-1', title: 'Validate the Underlying Desire', steps: ['Look past the envy to the desire underneath.', 'Say "It sounds like you really value that, and it\'s hard to see someone else have it."', 'This shows you understand the root of the pain.'] },
-      { id: 'ho8-2', title: 'Shift Focus to Their Strengths', steps: ['Gently remind them of their own unique talents and accomplishments.', 'Help them see what others might envy about them.', 'This can help rebalance their perspective.'] },
-    ],
-  },
-  {
-    id: 'emotion-9',
-    name: 'Overwhelm',
-    emoji: '🌀',
-    color: 'indigo',
-    description: 'Feeling swamped by mental, emotional, or physical demands, often leading to a sense of paralysis.',
-    relatedWords: ['Stressed', 'Swamped', 'Burnout'],
-    strategies: {
-      immediate: [
-        { id: 's9-1', title: 'Brain Dump', steps: ['Take a piece of paper and write down everything that is on your mind.', 'Don\'t organize it, just get it all out.', 'This clears your head and makes the tasks feel more manageable.'] },
-        { id: 's9-2', title: 'Pick One Small Thing', steps: ['Look at your list and choose the smallest, easiest task you can complete in 2 minutes.', 'Do it immediately.', 'This breaks the paralysis and creates forward momentum.'] },
-      ],
-      shortTerm: [
-        { id: 's9-3', title: 'Prioritize with the Eisenhower Matrix', steps: ['Divide your tasks into four quadrants: Urgent/Important, Not Urgent/Important, Urgent/Not Important, Not Urgent/Not Important.', 'Focus on the "Urgent/Important" box first.', 'This helps you focus your energy where it matters most.'] },
-        { id: 's9-4', title: 'Schedule Breaks and Rest', steps: ['Block out time in your calendar for breaks, just as you would for meetings.', 'Ensure you are getting enough sleep.', 'Rest is not a luxury; it is essential for effective functioning.'] },
-      ],
-      longTerm: [
-        { id: 's9-5', title: 'Simplify and Say No', steps: ['Regularly review your commitments and obligations.', 'Practice politely declining requests that are not aligned with your priorities.', 'Protecting your time and energy is a key skill.'] },
-        { id: 's9-6', title: 'Build Stress-Reduction Habits', steps: ['Incorporate small, regular stress-reducing activities into your day.', 'Examples: a 5-minute meditation, a short walk, listening to music.', 'This builds resilience against future overwhelm.'] },
-      ],
-    },
-    helpingOthers: [
-      { id: 'ho9-1', title: 'Offer Specific Help', steps: ['Instead of "Let me know if you need anything," say "Can I take care of dinner tonight?" or "I can handle that email for you."', 'This removes the mental load of them having to delegate.'] },
-      { id: 'ho9-2', title: 'Help Them Brain Dump and Prioritize', steps: ['Sit with them and a piece of paper.', 'Act as a scribe while they list everything on their mind.', 'Then, help them identify just one or two things to focus on first.'] },
-    ],
-  },
-  {
-    id: 'emotion-10',
-    name: 'Shame',
-    emoji: '⚫️',
-    color: 'rose',
-    description: 'A painful feeling that you are fundamentally flawed, caused by a consciousness of wrong or foolish behavior.',
-    relatedWords: ['Humiliation', 'Embarrassment', 'Worthlessness'],
-    strategies: {
-      immediate: [
-        { id: 's10-1', title: 'Ground Yourself', steps: ['Use the 5-4-3-2-1 technique to connect with your senses.', 'This pulls you out of the internal shame spiral and into the present moment.', 'Focus on your physical surroundings.'] },
-        { id: 's10-2', title: 'Soothe Your Nervous System', steps: ['Place a hand on your heart and another on your belly.', 'Breathe deeply and slowly.', 'This activates your parasympathetic nervous system and reduces the physical intensity of shame.'] },
-      ],
-      shortTerm: [
-        { id: 's10-3', title: 'Share with a Trusted Person', steps: ['Shame thrives in secrecy and isolation.', 'Share your experience with a non-judgmental friend or partner.', 'Hearing "I still love and respect you" is a powerful antidote.'] },
-        { id: 's10-4', title: 'Separate Self from Behavior', steps: ['Reframe the thought. Instead of "I am a bad person," say "I did something I regret."', 'This is the core difference between shame (self) and guilt (action).'] },
-      ],
-      longTerm: [
-        { id: 's10-5', title: 'Practice Self-Compassion', steps: ['Treat yourself with the same kindness you would offer a good friend.', 'Acknowledge that to be human is to be imperfect and make mistakes.', 'Counter your inner critic with a compassionate voice.'] },
-        { id: 's10-6', title: 'Identify Shame Triggers', steps: ['Notice what situations, people, or thoughts tend to trigger feelings of shame.', 'Awareness is the first step toward building resilience against them.', 'Recognize your patterns.'] },
-      ],
-    },
-    helpingOthers: [
-      { id: 'ho10-1', title: 'Empathize Without Judgment', steps: ['Listen to their story without showing shock, pity, or disgust.', 'Say, "That sounds incredibly painful," or "Thank you for trusting me with that."', 'Your calm acceptance is crucial.'] },
-      { id: 'ho10-2', title: 'Reassure Them of Their Worth', steps: ['Remind them of their positive qualities.', 'Stress that their actions do not define their entire being.', 'Express your continued love and respect for them as a person.'] },
-    ],
-  },
-  {
-    id: 'emotion-11',
-    name: 'Jealousy',
-    emoji: '💠',
-    color: 'cyan',
-    description: "The fear of losing a valued relationship you have to a third party. Jealousy is a three-person situation: You, your partner, and a perceived rival. It's about the threat of losing something you possess.",
-    relatedWords: ['Insecurity', 'Suspicion', 'Possessiveness'],
-    strategies: {
-      immediate: [
-        { id: 's11-1', title: 'Pause, Don\'t Pounce', steps: ['Resist the urge to immediately act on jealous feelings (e.g., checking phone, making accusations).', 'Take a few deep breaths to create space between the feeling and your reaction.'] },
-        { id: 's11-2', title: 'Reality Check', steps: ['Ask yourself: "What is the concrete evidence for my fear?"', 'Is there another, more generous explanation for what I\'m seeing or hearing?', 'Challenge your assumptions.'] },
-      ],
-      shortTerm: [
-        { id: 's11-3', title: 'Communicate Your Feelings Gently', steps: ['Use "I" statements. Instead of "You were flirting!", try "When I saw that, I felt insecure and scared of losing you."', 'Focus on your feeling, not their perceived crime.'] },
-        { id: 's11-4', title: 'Address the Underlying Insecurity', steps: ['What is the jealousy really about? Is it a fear of not being good enough?', 'Journal or reflect on the root cause of the insecurity.'] },
-      ],
-      longTerm: [
-        { id: 's11-5', title: 'Build Your Self-Esteem', steps: ['Invest in your own hobbies, friendships, and goals.', 'The more confident and fulfilled you are as an individual, the less your worth is tied to the relationship.', 'Become your own source of validation.'] },
-        { id: 's11-6', title: 'Cultivate Relational Trust', steps: ['Work on building a foundation of trust with your partner.', 'This comes from open communication, consistent behavior, and mutual respect over time.'] },
-      ],
-    },
-    helpingOthers: [
-      { id: 'ho11-1', title: 'Listen to the Underlying Fear', steps: ['Hear the fear of loss beneath their anger or suspicion.', 'Validate it: "It sounds like you\'re really scared of losing me/this relationship."', 'Acknowledge the vulnerability.'] },
-      { id: 'ho11-2', title: 'Offer Honest Reassurance', steps: ['Provide honest, specific reassurance of your commitment and feelings for them.', 'Avoid being dismissive ("You\'re being crazy"). This will only escalate their fear.'] },
-    ],
-  },
-  {
-    id: 'emotion-12',
-    name: 'Awe',
-    emoji: '✨',
+    name: 'Trust',
+    emoji: '🟤',
     color: 'sky',
-    description: 'A feeling of reverential respect mixed with wonder, often in response to something vast that transcends understanding.',
-    relatedWords: ['Wonder', 'Amazement', 'Veneration'],
+    description: 'A firm belief in the reliability, truth, ability, or strength of someone or something; feeling secure.',
+    relatedWords: ['Confidence', 'Faith', 'Security', 'Reliance'],
     strategies: {
       immediate: [
-        { id: 's12-1', title: 'Stay With the Feeling', steps: ['Don\'t rush to take a photo or post about it.', 'Just be present with the sensation. Notice how it feels in your body.', 'Let yourself feel small, in a good way.'] },
-        { id: 's12-2', title: 'Let Go of Understanding', steps: ['Awe often comes from things we can\'t fully comprehend.', 'Allow yourself to simply experience it without needing to analyze it immediately.', 'Embrace the mystery.'] },
+        { id: 's8-1', title: 'Acknowledge Trustworthy Acts', steps: ['When someone meets an expectation, notice it.', 'Verbally appreciate it: "Thank you for being so reliable."', 'This positive reinforcement strengthens the relationship.'] },
+        { id: 's8-2', title: 'Be Fully Present', steps: ['When interacting with someone you trust, put away distractions.', 'Active listening and engaged presence deepens the connection and reinforces feelings of security.'] },
+        { id: 's8-3', title: 'Notice Physical Sensations', steps: ['Check in with your body when you feel trust.', 'Notice the feeling of calm, relaxation, or openness.', 'Connecting the emotion to a physical state strengthens it.'] },
       ],
       shortTerm: [
-        { id: 's12-3', title: 'Share the Experience', steps: ['Talk about what you saw, heard, or felt with someone else.', 'Explaining it to another person can prolong and deepen the feeling for you.', 'Share the wonder.'] },
-        { id: 's12-4', title: 'Journal or Create', steps: ['Write about the experience in detail.', 'Draw it, or express it in some other creative way.', 'This helps you integrate the feeling and its meaning.'] },
+        { id: 's8-4', title: 'Practice Graduated Vulnerability', steps: ['Share something small and personal with someone you want to build trust with.', 'Their positive response creates a foundation for deeper connection.', 'This is a core concept from Brené Brown\'s research.'] },
+        { id: 's8-5', title: 'Be Consistently Reliable', steps: ['To build trust from others, keep your commitments.', 'Follow through on what you say you will do, no matter how small.', 'This also builds self-trust.'] },
+        { id: 's8-6', title: 'Communicate Needs and Boundaries', steps: ['Clearly and respectfully state your needs and limits.', 'Trust thrives on clarity and mutual respect.', 'This prevents misunderstandings that can erode trust.'] },
       ],
       longTerm: [
-        { id: 's12-5', title: 'Actively Seek Awe', steps: ['Make time for activities that are likely to induce awe.', 'Examples: spending time in nature, visiting a museum, listening to epic music, learning about space.'] },
-        { id: 's12-6', title: 'Practice "Awe Walks"', steps: ['Go for a walk with the specific intention of noticing things that are vast, amazing, or wonderful.', 'Shift your focus from the mundane to the magnificent that is all around you.'] },
+        { id: 's8-7', title: 'Build Self-Trust', steps: ['Make and keep small promises to yourself.', 'Listen to your intuition and act on it.', 'When you trust yourself, you are better able to assess the trustworthiness of others.'] },
+        { id: 's8-8', title: 'Learn Healthy Repair', steps: ['Understand that trust can be bent and repaired.', 'Learn the components of a sincere apology and how to forgive.', 'This makes relationships resilient. (See Gottman Institute research).'] },
+        { id: 's8-9', title: 'Assume Good Intent (with Discernment)', steps: ['Default to believing that people are doing their best.', 'This reduces cynicism and fosters an open-hearted approach to relationships.', 'Remain aware and protect yourself, but lead with generosity.'] },
       ],
     },
     helpingOthers: [
-      { id: 'ho12-1', title: 'Share the Silence', steps: ['If you are with someone experiencing awe, resist the urge to fill the silence with chatter.', 'Simply be present with them and share the moment.', 'Respect their internal experience.'] },
-      { id: 'ho12-2', title: 'Ask Open-Ended Questions Later', steps: ['After the moment has passed, you can ask questions like "What was that like for you?"', 'This helps them process and reflect on the powerful experience.'] },
+      { id: 'ho8-1', title: 'Be Consistent and Dependable', steps: ['Your actions are the most powerful trust-building tool.', 'Show up when you say you will. Follow through on your promises.', 'Reliability is the bedrock of trust.'] },
+      { id: 'ho8-2', title: 'Respect Their Pace and Boundaries', steps: ['If someone has been hurt, they may be slow to trust.', 'Do not push for more vulnerability than they are ready to offer.', 'Let them control the pace of the relationship.'] },
+      { id: 'ho8-3', title: 'Listen Without Judgment', steps: ['Create a safe emotional space for them to share their fears or past experiences.', 'Listen to understand, not to fix or rebut.', 'Your non-judgmental acceptance can be incredibly healing.'] },
     ],
   },
 ];
@@ -344,12 +248,6 @@ export const EMOTION_CATEGORIES: EmotionCategory[] = [
         id: 'cat-basic',
         name: 'Basic Emotions',
         isCollapsible: false,
-        emotions: ALL_EMOTIONS.slice(0, 6),
+        emotions: ALL_EMOTIONS,
     },
-    {
-        id: 'cat-complex',
-        name: 'Complex Emotions',
-        isCollapsible: true,
-        emotions: ALL_EMOTIONS.slice(6),
-    }
 ];
