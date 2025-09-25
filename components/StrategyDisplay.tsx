@@ -78,7 +78,17 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const StrategyCard: React.FC<{ strategy: Strategy; color: string; visible: boolean; delay: number; isDraggable?: boolean; isBeingDragged: boolean; onEdit: () => void; onDelete: () => void; }> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete }) => {
+const StrategyCard: React.FC<{ 
+    strategy: Strategy; 
+    color: string; 
+    visible: boolean; 
+    delay: number; 
+    isDraggable?: boolean; 
+    isBeingDragged: boolean; 
+    onEdit: () => void; 
+    onDelete: () => void;
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+}> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete, dragHandleProps }) => {
     const borderColorClass = emotionBorderStyles[color] || 'border-slate-500';
     return (
         <div 
@@ -88,7 +98,7 @@ const StrategyCard: React.FC<{ strategy: Strategy; color: string; visible: boole
           ${isBeingDragged ? 'opacity-40' : 'opacity-100'}
           flex items-start space-x-3`}
         >
-            {isDraggable && <div className="cursor-grab active:cursor-grabbing touch-none pt-1" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
+            {isDraggable && <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing touch-none pt-1" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
             <div className="flex-1">
                 <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100">{strategy.title}</h4>
                 <ol className="list-decimal list-inside space-y-2 mt-2 text-slate-600 dark:text-slate-400 text-base">
@@ -225,20 +235,13 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
           return (
             <div
               key={strategy.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, category, index)}
               onDragEnter={(e) => handleDragEnter(e, category, index)}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
-              onTouchStart={(e) => handleTouchStart(e, category, index)}
               onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={handleTouchEnd}
               data-drag-category={category}
               data-drag-index={index}
-              style={{ touchAction: 'none' }}
               className="transition-all duration-200"
             >
               {isDropTarget && !isBeingDragged && (
@@ -253,6 +256,14 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 isBeingDragged={isBeingDragged}
                 onEdit={() => onEditStrategyClick(category, strategy)}
                 onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
+                dragHandleProps={{
+                  draggable: true,
+                  onDragStart: (e) => handleDragStart(e, category, index),
+                  onDragEnd: handleDragEnd,
+                  onTouchStart: (e) => handleTouchStart(e, category, index),
+                  onTouchEnd: handleTouchEnd,
+                  onTouchCancel: handleTouchEnd,
+                }}
               />
             </div>
           )
