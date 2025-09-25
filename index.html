@@ -53,12 +53,8 @@
         if (savedThemeId && themes[savedThemeId]) {
           applyTheme(savedThemeId);
         } else {
-          // Fallback to system preference if no theme is saved
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            applyTheme('default-dark');
-          } else {
-            applyTheme('default-light');
-          }
+          // Default to light theme if no theme is saved
+          applyTheme('default-light');
         }
       } catch (e) {
         // Fallback for safety

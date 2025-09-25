@@ -7,13 +7,10 @@ const getInitialThemeId = (): string => {
     if (savedThemeId && themes[savedThemeId]) {
       return savedThemeId;
     }
-    // Fallback to system preference if no theme is saved
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'default-dark';
-    }
   } catch (e) {
     // Silently fail and fallback
   }
+  // Default to light theme if no theme is saved or accessible
   return 'default-light';
 };
 
