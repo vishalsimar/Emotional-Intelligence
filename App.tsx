@@ -3,9 +3,11 @@ import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
 import HistoryView from './components/HistoryView';
 import ThemePicker from './components/ThemePicker';
-import { Emotion, Strategy, EmotionLog } from './types';
-import { EMOTIONS } from './constants';
+import { Emotion, Strategy, EmotionLog, EmotionCategory } from './types';
+import { EMOTION_CATEGORIES } from './constants';
 import { useTheme } from './hooks/useTheme';
+
+type PlacementInfo = { type: 'existing' | 'new'; categoryId: string; categoryName: string };
 
 // Inlined EditorModal to avoid creating a new file
 export type ModalConfig = 
@@ -16,17 +18,24 @@ export type ModalConfig =
 
 interface EditorModalProps {
   config: ModalConfig | null;
-  onSave: (data: Emotion | Strategy) => void;
+  onSave: (data: Emotion | Strategy, placement?: PlacementInfo) => void;
   onClose: () => void;
+  categories: EmotionCategory[];
 }
 
 const emotionColors = ['red', 'blue', 'purple', 'yellow', 'green', 'orange', 'slate', 'teal', 'indigo', 'stone', 'lime', 'rose', 'cyan', 'sky'];
 
-const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) => {
+const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, categories }) => {
   const [emotionData, setEmotionData] = useState<Omit<Emotion, 'strategies' | 'helpingOthers'>>({ id: '', name: '', emoji: '', color: 'blue', description: '', relatedWords: [] });
   const [strategyData, setStrategyData] = useState<Omit<Strategy, 'id'>>({ title: '', steps: [] });
   const [relatedWordsStr, setRelatedWordsStr] = useState('');
   const [stepsStr, setStepsStr] = useState('');
+  
+  // State for new emotion placement
+  const [placementType, setPlacementType] = useState<'existing' | 'new'>('existing');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(categories[0]?.id || 'cat-basic');
+  const [newCategoryName, setNewCategoryName] = useState('');
+
 
   useEffect(() => {
     if (config?.type === 'emotion' && config.mode === 'edit') {
@@ -36,6 +45,9 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
     } else if (config?.type === 'emotion' && config.mode === 'add') {
       setEmotionData({ id: '', name: '', emoji: '⚪️', color: 'blue', description: '', relatedWords: [] });
       setRelatedWordsStr('');
+      setPlacementType('existing');
+      setSelectedCategoryId(categories[0]?.id || 'cat-basic');
+      setNewCategoryName('');
     } else if (config?.type === 'strategy' && config.mode === 'edit') {
       setStrategyData(config.strategy);
       setStepsStr(config.strategy.steps.join('\n'));
@@ -43,20 +55,25 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
       setStrategyData({ title: '', steps: [] });
       setStepsStr('');
     }
-  }, [config]);
+  }, [config, categories]);
 
   if (!config) return null;
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
     if (config.type === 'emotion') {
+      const placement: PlacementInfo = {
+        type: placementType,
+        categoryId: selectedCategoryId,
+        categoryName: newCategoryName.trim(),
+      };
       onSave({ 
         ...emotionData,
         relatedWords: relatedWordsStr.split(',').map(s => s.trim()).filter(Boolean),
         // Keep existing strategies when editing
         strategies: (config.mode === 'edit' ? config.emotion.strategies : { immediate: [], shortTerm: [], longTerm: [] }),
         helpingOthers: (config.mode === 'edit' ? config.emotion.helpingOthers : []),
-      });
+      }, placement);
     } else { // strategy
       onSave({ 
         ...strategyData,
@@ -101,6 +118,29 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose }) =>
           <label htmlFor="relatedWords" className="block text-sm font-medium text-[var(--text-secondary)]">Related Words (comma-separated)</label>
           <input type="text" id="relatedWords" value={relatedWordsStr} onChange={e => setRelatedWordsStr(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" />
         </div>
+
+        {config?.type === 'emotion' && config.mode === 'add' && (
+          <div className="pt-2">
+            <label className="block text-sm font-medium text-[var(--text-secondary)]">Placement</label>
+            <div className="mt-2 space-y-2 rounded-md bg-[var(--bg-secondary)] p-3 border border-[var(--border-primary)]">
+              {categories.map(cat => (
+                <div key={cat.id} className="flex items-center">
+                  <input id={`cat-${cat.id}`} name="placement" type="radio" checked={placementType === 'existing' && selectedCategoryId === cat.id} onChange={() => { setPlacementType('existing'); setSelectedCategoryId(cat.id); }} className="h-4 w-4 text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-[var(--accent-ring)]" />
+                  <label htmlFor={`cat-${cat.id}`} className="ml-3 block text-sm text-[var(--text-primary)]">Add to "{cat.name}"</label>
+                </div>
+              ))}
+              <div className="flex items-center">
+                <input id="cat-new" name="placement" type="radio" checked={placementType === 'new'} onChange={() => setPlacementType('new')} className="h-4 w-4 text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-[var(--accent-ring)]" />
+                <label htmlFor="cat-new" className="ml-3 block text-sm text-[var(--text-primary)]">Create new category</label>
+              </div>
+              {placementType === 'new' && (
+                <div className="pl-7 pt-1">
+                  <input type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New category name..." className="block w-full px-3 py-1.5 text-sm bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-[var(--accent-ring)] focus:border-[var(--accent-ring)]" required />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -171,13 +211,13 @@ const ClockIcon = () => (
 );
 
 const App: React.FC = () => {
-  const [emotions, setEmotions] = useState<Emotion[]>(() => {
+  const [emotionCategories, setEmotionCategories] = useState<EmotionCategory[]>(() => {
     try {
-      const savedEmotions = localStorage.getItem('emotions');
-      return savedEmotions ? JSON.parse(savedEmotions) : EMOTIONS;
+      const saved = localStorage.getItem('emotionCategories');
+      return saved ? JSON.parse(saved) : EMOTION_CATEGORIES;
     } catch (error) {
-      console.error("Failed to parse emotions from localStorage", error);
-      return EMOTIONS;
+      console.error("Failed to parse emotion categories from localStorage", error);
+      return EMOTION_CATEGORIES;
     }
   });
   const [history, setHistory] = useState<EmotionLog[]>(() => {
@@ -196,8 +236,8 @@ const App: React.FC = () => {
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('emotions', JSON.stringify(emotions));
-  }, [emotions]);
+    localStorage.setItem('emotionCategories', JSON.stringify(emotionCategories));
+  }, [emotionCategories]);
 
   useEffect(() => {
     localStorage.setItem('emotionHistory', JSON.stringify(history));
@@ -222,10 +262,12 @@ const App: React.FC = () => {
     };
     setHistory(prev => [newLog, ...prev]);
 
-    const currentEmotionState = emotions.find(e => e.id === emotion.id) || emotion;
+    // Find the current state of the emotion from the nested structure
+    const allEmotions = emotionCategories.flatMap(c => c.emotions);
+    const currentEmotionState = allEmotions.find(e => e.id === emotion.id) || emotion;
     setSelectedEmotion(currentEmotionState);
     setView('strategy');
-  }, [emotions]);
+  }, [emotionCategories]);
 
   const handleGoBack = useCallback(() => {
     setIsLeaving(true);
@@ -236,22 +278,30 @@ const App: React.FC = () => {
     }, 300);
   }, []);
   
-  const handleReorderEmotions = useCallback((reorderedEmotions: Emotion[]) => {
-    setEmotions(reorderedEmotions);
+  const handleReorderEmotions = useCallback((categoryId: string, reorderedEmotions: Emotion[]) => {
+    setEmotionCategories(prev => prev.map(cat => 
+        cat.id === categoryId 
+            ? { ...cat, emotions: reorderedEmotions }
+            : cat
+    ));
   }, []);
 
   const handleReorderStrategies = useCallback((emotionId: string, newStrategies: Emotion['strategies']) => {
-    const newEmotions = emotions.map(e => 
-      e.id === emotionId
-        ? { ...e, strategies: newStrategies }
-        : e
-    );
-    setEmotions(newEmotions);
+    const newCategories = emotionCategories.map(cat => ({
+        ...cat,
+        emotions: cat.emotions.map(e =>
+            e.id === emotionId
+                ? { ...e, strategies: newStrategies }
+                : e
+        )
+    }));
+    setEmotionCategories(newCategories);
     
     if (selectedEmotion?.id === emotionId) {
-        setSelectedEmotion(prev => prev ? { ...prev, strategies: newStrategies } : null);
+        const updatedEmotion = newCategories.flatMap(c => c.emotions).find(e => e.id === emotionId);
+        setSelectedEmotion(updatedEmotion || null);
     }
-  }, [emotions, selectedEmotion]);
+  }, [emotionCategories, selectedEmotion]);
 
   const handleClearHistory = () => {
     if (window.confirm('Are you sure you want to delete your entire emotion history? This cannot be undone.')) {
@@ -262,66 +312,99 @@ const App: React.FC = () => {
   // --- CRUD Handlers ---
   const handleDeleteEmotion = (emotionId: string) => {
     if (window.confirm('Are you sure you want to delete this emotion and all its strategies? This cannot be undone.')) {
-      setEmotions(prev => prev.filter(e => e.id !== emotionId));
+      setEmotionCategories(prev => prev
+        .map(cat => ({
+            ...cat,
+            emotions: cat.emotions.filter(e => e.id !== emotionId),
+        }))
+        // Remove any new categories that become empty, but keep the original ones
+        .filter(cat => cat.emotions.length > 0 || ['cat-basic', 'cat-complex'].includes(cat.id))
+      );
     }
   };
 
   const handleDeleteStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => {
      if (window.confirm('Are you sure you want to delete this strategy?')) {
-        const newEmotions = emotions.map(e => {
-            if (e.id === emotionId) {
-                const updatedEmotion = { ...e };
-                if (category === 'helpingOthers') {
-                    updatedEmotion.helpingOthers = updatedEmotion.helpingOthers.filter(s => s.id !== strategyId);
-                } else {
-                    updatedEmotion.strategies = {
-                        ...updatedEmotion.strategies,
-                        [category]: updatedEmotion.strategies[category].filter(s => s.id !== strategyId)
-                    };
+        const newEmotionCategories = emotionCategories.map(cat => ({
+            ...cat,
+            emotions: cat.emotions.map(e => {
+                if (e.id === emotionId) {
+                    const updatedEmotion = { ...e };
+                    if (category === 'helpingOthers') {
+                        updatedEmotion.helpingOthers = updatedEmotion.helpingOthers.filter(s => s.id !== strategyId);
+                    } else {
+                        updatedEmotion.strategies = {
+                            ...updatedEmotion.strategies,
+                            [category]: updatedEmotion.strategies[category].filter(s => s.id !== strategyId)
+                        };
+                    }
+                    return updatedEmotion;
                 }
-                return updatedEmotion;
-            }
-            return e;
-        });
-        setEmotions(newEmotions);
+                return e;
+            })
+        }));
+        setEmotionCategories(newEmotionCategories);
         if (selectedEmotion?.id === emotionId) {
-            setSelectedEmotion(newEmotions.find(e => e.id === emotionId) || null);
+            const updatedEmotion = newEmotionCategories.flatMap(c => c.emotions).find(e => e.id === emotionId);
+            setSelectedEmotion(updatedEmotion || null);
         }
     }
   };
   
-  const handleSave = (data: Emotion | Strategy) => {
+  const handleSave = (data: Emotion | Strategy, placement?: PlacementInfo) => {
     if (!modalConfig) return;
 
     if (modalConfig.type === 'emotion') {
       const emotionData = data as Emotion;
       if (modalConfig.mode === 'add') {
-        setEmotions(prev => [...prev, { ...emotionData, id: `emotion-${Date.now()}` }]);
-      } else {
-        setEmotions(prev => prev.map(e => e.id === emotionData.id ? emotionData : e));
+        const newEmotion = { ...emotionData, id: `emotion-${Date.now()}` };
+        if (placement?.type === 'existing') {
+          setEmotionCategories(prev => prev.map(cat => 
+            cat.id === placement.categoryId
+              ? { ...cat, emotions: [...cat.emotions, newEmotion] }
+              : cat
+          ));
+        } else if (placement?.type === 'new' && placement.categoryName) {
+          const newCategory: EmotionCategory = {
+            id: `cat-${Date.now()}`,
+            name: placement.categoryName,
+            isCollapsible: true, // New categories are collapsible by default
+            emotions: [newEmotion]
+          };
+          setEmotionCategories(prev => [...prev, newCategory]);
+        }
+      } else { // mode === 'edit'
+        setEmotionCategories(prev => prev.map(cat => ({
+          ...cat,
+          emotions: cat.emotions.map(e => e.id === emotionData.id ? emotionData : e)
+        })));
       }
     } else if (modalConfig.type === 'strategy') {
       const strategyData = data as Strategy;
       const { emotionId, category } = modalConfig;
       
-      const newEmotions = emotions.map(e => {
-        if (e.id === emotionId) {
-          const updatedEmotion = JSON.parse(JSON.stringify(e)); // Deep copy
-          const list = category === 'helpingOthers' ? updatedEmotion.helpingOthers : updatedEmotion.strategies[category];
-          
-          if (modalConfig.mode === 'add') {
-            list.push({ ...strategyData, id: `strategy-${Date.now()}` });
-          } else {
-            const index = list.findIndex((s: Strategy) => s.id === strategyData.id);
-            if (index !== -1) list[index] = strategyData;
+      const newEmotionCategories = emotionCategories.map(cat => ({
+        ...cat,
+        emotions: cat.emotions.map(e => {
+          if (e.id === emotionId) {
+            const updatedEmotion = JSON.parse(JSON.stringify(e)); // Deep copy
+            const list = category === 'helpingOthers' ? updatedEmotion.helpingOthers : updatedEmotion.strategies[category];
+            
+            if (modalConfig.mode === 'add') {
+              list.push({ ...strategyData, id: `strategy-${Date.now()}` });
+            } else {
+              const index = list.findIndex((s: Strategy) => s.id === strategyData.id);
+              if (index !== -1) list[index] = strategyData;
+            }
+            return updatedEmotion;
           }
-          return updatedEmotion;
-        }
-        return e;
-      });
-      setEmotions(newEmotions);
+          return e;
+        })
+      }));
+      setEmotionCategories(newEmotionCategories);
       if (selectedEmotion?.id === emotionId) {
-          setSelectedEmotion(newEmotions.find(e => e.id === emotionId) || null);
+          const updatedEmotion = newEmotionCategories.flatMap(c => c.emotions).find(e => e.id === emotionId);
+          setSelectedEmotion(updatedEmotion || null);
       }
     }
     setModalConfig(null);
@@ -359,7 +442,7 @@ const App: React.FC = () => {
           <div className="relative w-full">
             <div className={`transition-opacity duration-300 ease-in-out ${view !== 'selector' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <EmotionSelector 
-                emotions={emotions} 
+                categories={emotionCategories} 
                 onSelectEmotion={handleSelectEmotion} 
                 onReorder={handleReorderEmotions}
                 onEditClick={(emotion) => setModalConfig({ type: 'emotion', mode: 'edit', emotion })}
@@ -402,7 +485,7 @@ const App: React.FC = () => {
         </button>
       )}
 
-      <EditorModal config={modalConfig} onSave={handleSave} onClose={() => setModalConfig(null)} />
+      <EditorModal config={modalConfig} onSave={handleSave} onClose={() => setModalConfig(null)} categories={emotionCategories} />
     </>
   );
 };

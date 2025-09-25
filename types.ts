@@ -5,7 +5,7 @@ export interface Strategy {
 }
 
 export interface Emotion {
-  id: string;
+  id:string;
   name: string;
   emoji: string;
   color: string;
@@ -17,6 +17,13 @@ export interface Emotion {
     longTerm: Strategy[];
   };
   helpingOthers: Strategy[];
+}
+
+export interface EmotionCategory {
+  id: string;
+  name: string;
+  isCollapsible: boolean;
+  emotions: Emotion[];
 }
 
 export interface EmotionLog {

@@ -1,6 +1,6 @@
-import { Emotion } from './types';
+import { Emotion, EmotionCategory } from './types';
 
-export const EMOTIONS: Emotion[] = [
+const ALL_EMOTIONS: Emotion[] = [
   {
     id: 'emotion-1',
     name: 'Anger',
@@ -178,7 +178,6 @@ export const EMOTIONS: Emotion[] = [
     helpingOthers: [
       { id: 'ho6-1', title: 'Stay Calm and Grounding', steps: ['Your calm presence can be very reassuring.', 'Help them take a deep breath with you.', 'This co-regulation can be very effective.'] },
       { id: 'ho6-2', title: 'Validate and Give Space', steps: ['Acknowledge the shock by saying "Wow, that\'s a lot to take in."', 'Ask if they need a minute to process before talking.', 'Don\'t rush them.'] },
-      // FIX: The object below had an incorrect structure. Corrected to use 'title' and 'steps' properties.
       { id: 'ho6-3', title: 'Help Process Information', steps: ['Once the initial shock passes, help them make sense of it.', 'Ask open-ended questions like "How are you feeling about this?"', 'Listen without judgment.'] },
     ],
   },
@@ -338,4 +337,19 @@ export const EMOTIONS: Emotion[] = [
       { id: 'ho12-2', title: 'Ask Open-Ended Questions Later', steps: ['After the moment has passed, you can ask questions like "What was that like for you?"', 'This helps them process and reflect on the powerful experience.'] },
     ],
   },
+];
+
+export const EMOTION_CATEGORIES: EmotionCategory[] = [
+    {
+        id: 'cat-basic',
+        name: 'Basic Emotions',
+        isCollapsible: false,
+        emotions: ALL_EMOTIONS.slice(0, 6),
+    },
+    {
+        id: 'cat-complex',
+        name: 'Complex Emotions',
+        isCollapsible: true,
+        emotions: ALL_EMOTIONS.slice(6),
+    }
 ];
