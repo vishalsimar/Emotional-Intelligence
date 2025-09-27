@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, FormEvent } from 'react';
 import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
 import HistoryView from './components/HistoryView';
+import GraphView from './components/GraphView';
 import ThemePicker from './components/ThemePicker';
 import { Emotion, Strategy, EmotionLog, EmotionCategory } from './types';
 import { EMOTION_CATEGORIES } from './constants';
@@ -210,6 +211,14 @@ const ClockIcon = () => (
   </svg>
 );
 
+const GraphIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+);
+
 const App: React.FC = () => {
   const [emotionCategories, setEmotionCategories] = useState<EmotionCategory[]>(() => {
     try {
@@ -230,7 +239,7 @@ const App: React.FC = () => {
     }
   });
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
-  const [view, setView] = useState<'selector' | 'strategy' | 'history'>('selector');
+  const [view, setView] = useState<'selector' | 'strategy' | 'history' | 'graph'>('selector');
   const [isLeaving, setIsLeaving] = useState(false);
   const { themeId, setThemeId, currentTheme } = useTheme();
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
@@ -244,7 +253,7 @@ const App: React.FC = () => {
   }, [history]);
 
   useEffect(() => {
-    if (view === 'strategy' || view === 'history') {
+    if (['strategy', 'history', 'graph'].includes(view)) {
       document.body.classList.add('strategy-view-active');
     } else {
       document.body.classList.remove('strategy-view-active');
@@ -424,6 +433,13 @@ const App: React.FC = () => {
             </div>
             <div className="absolute right-0 flex items-center space-x-2">
               <button
+                onClick={() => setView('graph')}
+                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                aria-label="View emotion trends"
+              >
+                <GraphIcon />
+              </button>
+              <button
                 onClick={() => setView('history')}
                 className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="View emotion history"
@@ -465,6 +481,14 @@ const App: React.FC = () => {
                   history={history}
                   onBack={() => setView('selector')}
                   onClearHistory={handleClearHistory}
+                />
+              )}
+            </div>
+            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'graph' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              {view === 'graph' && (
+                <GraphView
+                    history={history}
+                    onBack={() => setView('selector')}
                 />
               )}
             </div>
