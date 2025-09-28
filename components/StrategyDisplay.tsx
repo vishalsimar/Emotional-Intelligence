@@ -44,6 +44,13 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const ResetIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M3 2v6h6"/>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 12"/>
+    </svg>
+);
+
 const StrategyCard: React.FC<{ 
     strategy: Strategy; 
     color: string; 
@@ -54,7 +61,12 @@ const StrategyCard: React.FC<{
     onEdit: () => void; 
     onDelete: () => void;
     dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
-}> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete, dragHandleProps }) => {
+    checkedState: boolean[];
+    onToggleStep: (stepIndex: number) => void;
+    onReset: () => void;
+}> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete, dragHandleProps, checkedState, onToggleStep, onReset }) => {
+    const hasCheckedStep = checkedState?.some(Boolean);
+    
     return (
         <div 
           style={{ transitionDelay: `${delay}ms` }}
@@ -66,19 +78,38 @@ const StrategyCard: React.FC<{
             {isDraggable && <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing touch-none pt-1" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
             <div className="flex-1">
                 <h4 className="font-bold text-lg text-[var(--text-primary)]">{strategy.title}</h4>
-                <ol className="list-decimal list-inside space-y-2 mt-2 text-[var(--text-secondary)] text-base">
+                 <ol className="list-none space-y-2 mt-2 text-base">
                     {strategy.steps.map((step, index) => (
-                        <li key={index}>{step}</li>
+                        <li key={index}>
+                            <label className="flex items-center cursor-pointer group/item">
+                                <input
+                                    type="checkbox"
+                                    checked={checkedState?.[index] || false}
+                                    onChange={() => onToggleStep(index)}
+                                    className="form-checkbox h-5 w-5 rounded text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-offset-0 focus:ring-2 focus:ring-[var(--accent-ring)] transition"
+                                />
+                                <span className={`ml-3 transition ${checkedState?.[index] ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
+                                    {step}
+                                </span>
+                            </label>
+                        </li>
                     ))}
                 </ol>
             </div>
-            <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button onClick={onEdit} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
-                    <EditIcon className="w-4 h-4" />
-                </button>
-                <button onClick={onDelete} className="p-1.5 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
-                    <TrashIcon className="w-4 h-4" />
-                </button>
+             <div className="flex items-center">
+                {hasCheckedStep && (
+                    <button onClick={onReset} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Reset checklist for ${strategy.title}`}>
+                        <ResetIcon className="w-4 h-4" />
+                    </button>
+                )}
+                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button onClick={onEdit} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
+                        <EditIcon className="w-4 h-4" />
+                    </button>
+                    <button onClick={onDelete} className="p-1.5 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -92,11 +123,41 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
 
   const [visible, setVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
+  const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
   
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
+    const allStrategies = [
+      ...emotion.strategies.immediate,
+      ...emotion.strategies.shortTerm,
+      ...emotion.strategies.longTerm,
+      ...emotion.helpingOthers,
+    ];
+    const initialCheckedState: Record<string, boolean[]> = {};
+    allStrategies.forEach(strategy => {
+      initialCheckedState[strategy.id] = Array(strategy.steps.length).fill(false);
+    });
+    setCheckedSteps(initialCheckedState);
     return () => clearTimeout(timer);
-  }, []);
+  }, [emotion]);
+
+  const handleToggleStep = (strategyId: string, stepIndex: number) => {
+    setCheckedSteps(prev => {
+      const newSteps = [...(prev[strategyId] || [])];
+      newSteps[stepIndex] = !newSteps[stepIndex];
+      return { ...prev, [strategyId]: newSteps };
+    });
+  };
+
+  const handleResetSteps = (strategyId: string) => {
+    const strategy = [...strategies.immediate, ...strategies.shortTerm, ...strategies.longTerm, ...helpingOthers].find(s => s.id === strategyId);
+    if (!strategy) return;
+
+    setCheckedSteps(prev => ({
+      ...prev,
+      [strategyId]: Array(strategy.steps.length).fill(false)
+    }));
+  };
 
   const dragItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
   const dragOverItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
@@ -219,6 +280,9 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 delay={(itemOffset + index) * 50}
                 isDraggable={true}
                 isBeingDragged={isBeingDragged}
+                checkedState={checkedSteps[strategy.id] || []}
+                onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                onReset={() => handleResetSteps(strategy.id)}
                 onEdit={() => onEditStrategyClick(category, strategy)}
                 onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
                 dragHandleProps={{
@@ -316,6 +380,9 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 delay={index * 50}
                 isDraggable={false}
                 isBeingDragged={false}
+                checkedState={checkedSteps[strategy.id] || []}
+                onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                onReset={() => handleResetSteps(strategy.id)}
                 onEdit={() => onEditStrategyClick('helpingOthers', strategy)}
                 onDelete={() => onDeleteStrategyClick(emotionId, 'helpingOthers', strategy.id)}
               />
@@ -336,6 +403,30 @@ style.innerHTML = `
 .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
 @keyframes fade-in-content { 0% { opacity: 0; } 100% { opacity: 1; } }
 .animate-fade-in-content { animation: fade-in-content 0.4s ease-out forwards; }
+.form-checkbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  background-origin: border-box;
+  border: 1px solid var(--border-secondary);
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.25em;
+  height: 1.25em;
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.form-checkbox:checked {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 `;
 document.head.appendChild(style);
 
