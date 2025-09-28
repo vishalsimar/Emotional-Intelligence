@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Emotion, EmotionCategory } from '../types';
 
 interface EmotionSelectorProps {
@@ -11,15 +11,18 @@ interface EmotionSelectorProps {
   onAddEmotionClick: () => void;
 }
 
-const GripVerticalIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-[var(--text-secondary)]/50 group-hover:text-[var(--text-secondary)] transition-colors">
-    <circle cx="9" cy="12" r="1"></circle>
-    <circle cx="9" cy="5" r="1"></circle>
-    <circle cx="9" cy="19" r="1"></circle>
-    <circle cx="15" cy="12" r="1"></circle>
-    <circle cx="15" cy="5" r="1"></circle>
-    <circle cx="15" cy="19" r="1"></circle>
-  </svg>
+const ArrowUpIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+);
+
+const ArrowDownIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <polyline points="19 12 12 19 5 12"></polyline>
+    </svg>
 );
 
 const EditIcon = ({ className }: { className?: string }) => (
@@ -47,16 +50,7 @@ const PlusIcon = ({ className }: { className?: string }) => (
 
 const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick, onAddEmotionClick }) => {
   const [isRendered, setIsRendered] = useState(false);
-  const dragItem = useRef<{ categoryId: string, index: number } | null>(null);
-  const dragOverItem = useRef<{ categoryId: string, index: number } | null>(null);
-  const [dragOverInfo, setDragOverInfo] = useState<{ categoryId: string, index: number } | null>(null);
-  const [draggedInfo, setDraggedInfo] = useState<{ categoryId: string, index: number } | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  
-  // For touch drag
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartTimeout = useRef<number | null>(null);
-  const didDrag = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsRendered(true), 100);
@@ -74,140 +68,46 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
         return newState;
     });
   }, [categories]);
-  
-  const handleDragStart = (e: React.DragEvent<HTMLButtonElement>, categoryId: string, index: number) => {
-    dragItem.current = { categoryId, index };
-    setDraggedInfo({ categoryId, index });
-    e.dataTransfer.effectAllowed = 'move';
-  };
 
-  const handleDragEnter = (e: React.DragEvent<HTMLButtonElement>, categoryId: string, index: number) => {
-    if (dragItem.current?.categoryId === categoryId) {
-        dragOverItem.current = { categoryId, index };
-        setDragOverInfo({ categoryId, index });
-    }
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
-    e.preventDefault(); 
-  };
-  
-  const handleDragLeave = () => {
-    setDragOverInfo(null);
-  };
-
-  const handleDrop = (categoryId: string) => {
-    if (!dragItem.current || !dragOverItem.current || dragItem.current.categoryId !== categoryId || dragOverItem.current.categoryId !== categoryId || dragItem.current.index === dragOverItem.current.index) return;
-    
+  const handleMoveEmotion = (categoryId: string, index: number, direction: 'up' | 'down') => {
     const category = categories.find(c => c.id === categoryId);
     if (!category) return;
 
     const emotionsCopy = [...category.emotions];
-    const dragItemContent = emotionsCopy[dragItem.current.index];
-    emotionsCopy.splice(dragItem.current.index, 1);
-    emotionsCopy.splice(dragOverItem.current.index, 0, dragItemContent);
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (newIndex < 0 || newIndex >= emotionsCopy.length) return;
     
+    // Swap elements
+    [emotionsCopy[index], emotionsCopy[newIndex]] = [emotionsCopy[newIndex], emotionsCopy[index]];
+
     onReorder(categoryId, emotionsCopy);
-  };
-
-  const handleDragEnd = () => {
-    dragItem.current = null;
-    dragOverItem.current = null;
-    setDragOverInfo(null);
-    setDraggedInfo(null);
-  };
-
-  // Touch handlers
-  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>, categoryId: string, index: number) => {
-    didDrag.current = false;
-    if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
-    dragStartTimeout.current = window.setTimeout(() => {
-      dragItem.current = { categoryId, index };
-      setDraggedInfo({ categoryId, index });
-      setIsDragging(true);
-      if (navigator.vibrate) navigator.vibrate(50);
-    }, 200);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
-    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (!isDragging || !dragItem.current) return;
-    
-    didDrag.current = true;
-    const touch = e.touches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!targetElement) return;
-
-    const buttonElement = targetElement.closest('button[data-emotion-id]');
-    if (!buttonElement) return;
-
-    const categoryId = buttonElement.getAttribute('data-category-id');
-    const indexStr = buttonElement.getAttribute('data-index');
-
-    if (categoryId === dragItem.current.categoryId && indexStr) {
-        const index = parseInt(indexStr, 10);
-        if (index !== dragOverItem.current?.index) {
-          dragOverItem.current = { categoryId, index };
-          setDragOverInfo({ categoryId, index });
-        }
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (isDragging && didDrag.current && dragItem.current) { 
-        handleDrop(dragItem.current.categoryId); 
-    }
-    handleDragEnd();
-    setTimeout(() => {
-        setIsDragging(false);
-    }, 50);
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, emotion: Emotion) => {
-    if (didDrag.current) { 
-        e.preventDefault();
-        return; 
-    }
-    onSelectEmotion(emotion);
   };
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
 
-  const EmotionCard: React.FC<{ emotion: Emotion; index: number; categoryId: string }> = ({ emotion, index, categoryId }) => {
-    const isBeingDragged = draggedInfo?.categoryId === categoryId && draggedInfo?.index === index;
-    const isDropTarget = dragOverInfo?.categoryId === categoryId && dragOverInfo?.index === index && !isBeingDragged;
-
+  const EmotionCard: React.FC<{ emotion: Emotion; index: number; categoryId: string; isFirst: boolean; isLast: boolean; }> = ({ emotion, index, categoryId, isFirst, isLast }) => {
     const colorClasses = `bg-[var(--bg-secondary)] border-[var(--color-${emotion.color}-border)] hover:bg-[var(--color-${emotion.color}-hover-bg)] hover:border-[var(--color-${emotion.color}-hover-border)] focus:ring-[var(--color-${emotion.color}-ring)]`;
 
     return (
       <button
-        data-emotion-id={emotion.id}
-        data-category-id={categoryId}
-        data-index={index}
-        onClick={(e) => handleClick(e, emotion)}
-        draggable
-        onDragStart={(e) => handleDragStart(e, categoryId, index)}
-        onDragEnter={(e) => handleDragEnter(e, categoryId, index)}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={() => handleDrop(categoryId)}
-        onDragEnd={handleDragEnd}
-        onTouchStart={(e) => handleTouchStart(e, categoryId, index)}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-        style={{ transitionDelay: `${index * 50}ms`, touchAction: isDragging ? 'none' : 'pan-y' }}
+        onClick={() => onSelectEmotion(emotion)}
+        style={{ transitionDelay: `${index * 50}ms` }}
         className={`p-4 rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative
         ${colorClasses}
-        ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-        ${isBeingDragged ? 'opacity-40 scale-105 shadow-2xl' : ''}
-        ${isDropTarget ? `scale-105 shadow-2xl ring-2 ring-[var(--accent-ring)] ring-offset-2 ring-offset-[var(--bg-primary)]` : ''}`}
-        aria-label={`Select ${emotion.name} or drag to reorder`}
+        ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        aria-label={`Select ${emotion.name}`}
       >
-        <div className="absolute top-2 left-2 cursor-grab active:cursor-grabbing p-1 z-10"><GripVerticalIcon /></div>
+        <div className="absolute top-2 left-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+            <button onClick={(e) => { e.stopPropagation(); handleMoveEmotion(categoryId, index, 'up'); }} disabled={isFirst} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed" aria-label={`Move ${emotion.name} up`}>
+                <ArrowUpIcon className="w-4 h-4" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); handleMoveEmotion(categoryId, index, 'down'); }} disabled={isLast} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50 disabled:cursor-not-allowed" aria-label={`Move ${emotion.name} down`}>
+                <ArrowDownIcon className="w-4 h-4" />
+            </button>
+        </div>
         <div className="absolute top-2 right-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
             <button onClick={(e) => { e.stopPropagation(); onEditClick(emotion); }} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${emotion.name}`}><EditIcon className="w-4 h-4" /></button>
             <button onClick={(e) => { e.stopPropagation(); onDeleteClick(emotion.id); }} className="p-1.5 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${emotion.name}`}><TrashIcon className="w-4 h-4" /></button>
@@ -256,9 +156,19 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
 
             {(!category.isCollapsible || expandedCategories[category.id]) && (
                 <div id={`category-grid-${category.id}`} className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
-                {category.emotions.map((emotion, index) => (
-                    <EmotionCard key={emotion.id} emotion={emotion} index={index} categoryId={category.id} />
-                ))}
+                {category.emotions.map((emotion, index) => {
+                    const categoryEmotionsCount = category.emotions.length;
+                    return (
+                        <EmotionCard 
+                            key={emotion.id} 
+                            emotion={emotion} 
+                            index={index} 
+                            categoryId={category.id} 
+                            isFirst={index === 0}
+                            isLast={index === categoryEmotionsCount - 1}
+                        />
+                    );
+                })}
                 {catIndex === categories.length - 1 && <AddEmotionCard />}
                 </div>
             )}

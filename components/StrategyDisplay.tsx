@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Emotion, Strategy } from '../types';
 
@@ -10,14 +11,17 @@ interface StrategyDisplayProps {
   onDeleteStrategyClick: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => void;
 }
 
-const GripVerticalIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-[var(--text-secondary)]/60 group-hover:text-[var(--text-secondary)] transition-colors flex-shrink-0 cursor-grab active:cursor-grabbing">
-      <circle cx="9" cy="12" r="1"></circle>
-      <circle cx="9" cy="5" r="1"></circle>
-      <circle cx="9" cy="19" r="1"></circle>
-      <circle cx="15" cy="12" r="1"></circle>
-      <circle cx="15" cy="5" r="1"></circle>
-      <circle cx="15" cy="19" r="1"></circle>
+const ArrowUpIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+);
+
+const ArrowDownIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <polyline points="19 12 12 19 5 12"></polyline>
     </svg>
 );
 
@@ -55,16 +59,17 @@ const StrategyCard: React.FC<{
     strategy: Strategy; 
     color: string; 
     visible: boolean; 
-    delay: number; 
-    isDraggable?: boolean; 
-    isBeingDragged: boolean; 
+    delay: number;
+    isDraggable?: boolean;
+    isFirst: boolean;
+    isLast: boolean;
+    onMove: (direction: 'up' | 'down') => void;
     onEdit: () => void; 
     onDelete: () => void;
-    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
     checkedState: boolean[];
     onToggleStep: (stepIndex: number) => void;
     onReset: () => void;
-}> = ({ strategy, color, visible, delay, isDraggable = true, isBeingDragged, onEdit, onDelete, dragHandleProps, checkedState, onToggleStep, onReset }) => {
+}> = ({ strategy, color, visible, delay, isDraggable = true, isFirst, isLast, onMove, onEdit, onDelete, checkedState, onToggleStep, onReset }) => {
     const hasCheckedStep = checkedState?.some(Boolean);
     
     return (
@@ -72,10 +77,8 @@ const StrategyCard: React.FC<{
           style={{ transitionDelay: `${delay}ms` }}
           className={`bg-[var(--bg-secondary)] p-5 rounded-lg border-l-4 border-[var(--color-${color}-border)] transition-all duration-300 ease-out shadow-md group
           ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-          ${isBeingDragged ? 'opacity-40' : 'opacity-100'}
-          flex items-start space-x-3`}
+          flex items-start`}
         >
-            {isDraggable && <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing touch-none pt-1" aria-label="Drag to reorder"><GripVerticalIcon /></div>}
             <div className="flex-1">
                 <h4 className="font-bold text-lg text-[var(--text-primary)]">{strategy.title}</h4>
                  <ol className="list-none space-y-2 mt-2 text-base">
@@ -103,6 +106,16 @@ const StrategyCard: React.FC<{
                     </button>
                 )}
                 <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {isDraggable && (
+                        <>
+                            <button onClick={() => onMove('up')} disabled={isFirst} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} up`}>
+                                <ArrowUpIcon className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => onMove('down')} disabled={isLast} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} down`}>
+                                <ArrowDownIcon className="w-4 h-4" />
+                            </button>
+                        </>
+                    )}
                     <button onClick={onEdit} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
                         <EditIcon className="w-4 h-4" />
                     </button>
@@ -159,96 +172,17 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       [strategyId]: Array(strategy.steps.length).fill(false)
     }));
   };
+  
+  const handleMoveStrategy = (category: StrategyCategory, index: number, direction: 'up' | 'down') => {
+    const newStrategies = JSON.parse(JSON.stringify(strategies));
+    const list = newStrategies[category];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
 
-  const dragItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
-  const dragOverItem = useRef<{ category: StrategyCategory; index: number } | null>(null);
-  const [dragOverInfo, setDragOverInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
-  const [draggedInfo, setDraggedInfo] = useState<{ category: StrategyCategory; index: number } | null>(null);
+    if (newIndex < 0 || newIndex >= list.length) return;
 
-  // Touch Drag State
-  const dragStartTimeout = useRef<number | null>(null);
-  const isDraggingRef = useRef(false);
-  const didDrag = useRef(false);
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
-    dragItem.current = { category, index };
-    setDraggedInfo({ category, index });
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
-    if (dragItem.current?.category === category) {
-      dragOverItem.current = { category, index };
-      setDragOverInfo({ category, index });
-    } else {
-      dragOverItem.current = null;
-      setDragOverInfo(null);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
-  const handleDragLeave = () => setDragOverInfo(null);
-  const handleDragEnd = () => {
-    dragItem.current = null;
-    dragOverItem.current = null;
-    setDragOverInfo(null);
-    setDraggedInfo(null);
-  };
-  const handleDrop = () => {
-    if (!dragItem.current || !dragOverItem.current || dragItem.current.category !== dragOverItem.current.category || (dragItem.current.index === dragOverItem.current.index)) return;
-
-    const newStrategies = JSON.parse(JSON.stringify(strategies)); // Deep copy
-    const sourceList = newStrategies[dragItem.current.category];
-    
-    const draggedContent = sourceList[dragItem.current.index];
-    sourceList.splice(dragItem.current.index, 1);
-    sourceList.splice(dragOverItem.current.index, 0, draggedContent);
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
     
     onReorderStrategies(emotionId, newStrategies);
-  };
-
-    // Touch handlers
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
-    didDrag.current = false;
-    if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
-    dragStartTimeout.current = window.setTimeout(() => {
-        dragItem.current = { category, index };
-        setDraggedInfo({ category, index });
-        isDraggingRef.current = true;
-        if (navigator.vibrate) navigator.vibrate(50);
-    }, 200);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (!isDraggingRef.current || !dragItem.current) return;
-
-    didDrag.current = true;
-    const touch = e.touches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!targetElement) return;
-
-    const draggableDiv = targetElement.closest('[data-drag-category]');
-    if (!draggableDiv) return;
-
-    const category = draggableDiv.getAttribute('data-drag-category') as StrategyCategory;
-    const index = parseInt(draggableDiv.getAttribute('data-drag-index') || '-1', 10);
-    
-    if (index !== -1 && dragItem.current?.category === category) {
-        if (index !== dragOverItem.current?.index || category !== dragOverItem.current?.category) {
-            dragOverItem.current = { category, index };
-            setDragOverInfo({ category, index });
-        }
-    }
-  };
-  
-  const handleTouchEnd = () => {
-    if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (isDraggingRef.current && didDrag.current) {
-        handleDrop();
-    }
-    handleDragEnd();
-    isDraggingRef.current = false;
   };
 
   const StrategyCategoryList: React.FC<{
@@ -260,49 +194,24 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     <div>
       <h3 className="text-2xl font-semibold text-[var(--text-primary)]/80 mb-6">{title}</h3>
       <div className="flex flex-col space-y-4">
-        {strategies.map((strategy, index) => {
-          const isBeingDragged = draggedInfo?.category === category && draggedInfo?.index === index;
-          const isDropTarget = dragOverInfo?.category === category && dragOverInfo?.index === index;
-          
-          return (
-            <div
+        {strategies.map((strategy, index) => (
+            <StrategyCard
               key={strategy.id}
-              onDragEnter={(e) => handleDragEnter(e, category, index)}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onTouchMove={handleTouchMove}
-              data-drag-category={category}
-              data-drag-index={index}
-              className="transition-all duration-200"
-            >
-              {isDropTarget && !isBeingDragged && (
-                <div className="h-1.5 bg-[var(--accent-primary)]/50 rounded-full my-2 transition-all" aria-hidden="true" />
-              )}
-              <StrategyCard
-                strategy={strategy}
-                color={color}
-                visible={visible}
-                delay={(itemOffset + index) * 50}
-                isDraggable={true}
-                isBeingDragged={isBeingDragged}
-                checkedState={checkedSteps[strategy.id] || []}
-                onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
-                onReset={() => handleResetSteps(strategy.id)}
-                onEdit={() => onEditStrategyClick(category, strategy)}
-                onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
-                dragHandleProps={{
-                  draggable: true,
-                  onDragStart: (e) => handleDragStart(e, category, index),
-                  onDragEnd: handleDragEnd,
-                  onTouchStart: (e) => handleTouchStart(e, category, index),
-                  onTouchEnd: handleTouchEnd,
-                  onTouchCancel: handleTouchEnd,
-                }}
-              />
-            </div>
-          )
-        })}
+              strategy={strategy}
+              color={color}
+              visible={visible}
+              delay={(itemOffset + index) * 50}
+              isDraggable={true}
+              isFirst={index === 0}
+              isLast={index === strategies.length - 1}
+              onMove={(direction) => handleMoveStrategy(category, index, direction)}
+              checkedState={checkedSteps[strategy.id] || []}
+              onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+              onReset={() => handleResetSteps(strategy.id)}
+              onEdit={() => onEditStrategyClick(category, strategy)}
+              onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
+            />
+        ))}
          <button onClick={() => onAddStrategyClick(category)} className="mt-2 w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
             <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
         </button>
@@ -385,7 +294,8 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 visible={visible}
                 delay={index * 50}
                 isDraggable={false}
-                isBeingDragged={false}
+                isFirst={true} isLast={true} /* Reordering disabled for this section for now */
+                onMove={() => {}}
                 checkedState={checkedSteps[strategy.id] || []}
                 onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
                 onReset={() => handleResetSteps(strategy.id)}
