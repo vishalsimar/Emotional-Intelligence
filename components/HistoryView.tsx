@@ -85,15 +85,15 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
                                         style={{ animationDelay: `${index * 30}ms` }}
                                     >
                                         <div className={`bg-[var(--bg-secondary)] p-4 rounded-lg border-l-4 border-[var(--color-${log.emotionColor}-border)] shadow-sm flex items-center justify-between`}>
-                                            <div className="flex items-center space-x-4">
+                                            <div className="flex items-center space-x-4 flex-1">
                                                 <span className="text-3xl">{log.emotionEmoji}</span>
-                                                <div>
+                                                <div className="flex-1">
                                                     <p className="font-semibold text-[var(--text-primary)]">{log.emotionName}</p>
                                                 </div>
+                                                <p className="text-sm text-[var(--text-secondary)] flex-shrink-0 ml-4">
+                                                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
                                             </div>
-                                            <p className="text-sm text-[var(--text-secondary)]">
-                                                {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
                                         </div>
                                     </li>
                                 ))}

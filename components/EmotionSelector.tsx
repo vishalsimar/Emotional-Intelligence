@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Emotion, EmotionCategory } from '../types';
 
@@ -7,6 +8,7 @@ interface EmotionSelectorProps {
   onReorder: (categoryId: string, emotions: Emotion[]) => void;
   onEditClick: (emotion: Emotion) => void;
   onDeleteClick: (emotionId: string) => void;
+  onAddEmotionClick: () => void;
 }
 
 const GripVerticalIcon = () => (
@@ -36,7 +38,14 @@ const TrashIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick }) => {
+const PlusIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+);
+
+const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick, onAddEmotionClick }) => {
   const [isRendered, setIsRendered] = useState(false);
   const dragItem = useRef<{ categoryId: string, index: number } | null>(null);
   const dragOverItem = useRef<{ categoryId: string, index: number } | null>(null);
@@ -47,6 +56,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
   // For touch drag
   const [isDragging, setIsDragging] = useState(false);
   const dragStartTimeout = useRef<number | null>(null);
+  const didDrag = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsRendered(true), 100);
@@ -109,6 +119,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
 
   // Touch handlers
   const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>, categoryId: string, index: number) => {
+    didDrag.current = false;
     if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
     dragStartTimeout.current = window.setTimeout(() => {
       dragItem.current = { categoryId, index };
@@ -122,6 +133,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
     if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
     if (!isDragging || !dragItem.current) return;
     
+    didDrag.current = true;
     const touch = e.touches[0];
     const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!targetElement) return;
@@ -143,13 +155,20 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
 
   const handleTouchEnd = () => {
     if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (isDragging && dragItem.current) { handleDrop(dragItem.current.categoryId); }
+    if (isDragging && didDrag.current && dragItem.current) { 
+        handleDrop(dragItem.current.categoryId); 
+    }
     handleDragEnd();
-    setTimeout(() => setIsDragging(false), 50);
+    setTimeout(() => {
+        setIsDragging(false);
+    }, 50);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>, emotion: Emotion) => {
-    if (isDragging) { e.preventDefault(); return; }
+    if (didDrag.current) { 
+        e.preventDefault();
+        return; 
+    }
     onSelectEmotion(emotion);
   };
 
@@ -161,7 +180,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
     const isBeingDragged = draggedInfo?.categoryId === categoryId && draggedInfo?.index === index;
     const isDropTarget = dragOverInfo?.categoryId === categoryId && dragOverInfo?.index === index && !isBeingDragged;
 
-    const colorClasses = `bg-[var(--color-${emotion.color}-bg)] border-[var(--color-${emotion.color}-border)] hover:bg-[var(--color-${emotion.color}-hover-bg)] hover:border-[var(--color-${emotion.color}-hover-border)] focus:ring-[var(--color-${emotion.color}-ring)]`;
+    const colorClasses = `bg-[var(--bg-secondary)] border-[var(--color-${emotion.color}-border)] hover:bg-[var(--color-${emotion.color}-hover-bg)] hover:border-[var(--color-${emotion.color}-hover-border)] focus:ring-[var(--color-${emotion.color}-ring)]`;
 
     return (
       <button
@@ -181,7 +200,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         style={{ transitionDelay: `${index * 50}ms`, touchAction: isDragging ? 'none' : 'pan-y' }}
-        className={`p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative
+        className={`p-4 rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative
         ${colorClasses}
         ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
         ${isBeingDragged ? 'opacity-40 scale-105 shadow-2xl' : ''}
@@ -200,13 +219,26 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
     );
   };
 
+  const AddEmotionCard = () => (
+     <button
+        onClick={onAddEmotionClick}
+        style={{ transitionDelay: `${categories.flatMap(c => c.emotions).length * 50}ms` }}
+        className={`p-4 rounded-2xl transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] text-center border-2 border-dashed border-[var(--border-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-primary)] group flex flex-col justify-center items-center
+        ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        aria-label="Add new emotion"
+    >
+        <PlusIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)] transition-colors" />
+        <div className="font-bold text-lg sm:text-xl text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors mt-4">Add Emotion</div>
+    </button>
+  );
+
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] mb-2">How are you feeling?</h2>
       <p className="text-[var(--text-secondary)] mb-8 text-center">Select a feeling to explore management strategies.</p>
-      
+
       <div className="w-full space-y-10 pb-20">
-        {categories.map(category => (
+        {categories.map((category, catIndex) => (
           <section key={category.id}>
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-[var(--border-primary)]"></div></div>
@@ -227,6 +259,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
                 {category.emotions.map((emotion, index) => (
                     <EmotionCard key={emotion.id} emotion={emotion} index={index} categoryId={category.id} />
                 ))}
+                {catIndex === categories.length - 1 && <AddEmotionCard />}
                 </div>
             )}
           </section>

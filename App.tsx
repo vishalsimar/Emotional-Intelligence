@@ -1,9 +1,11 @@
-import React, { useState, useCallback, useEffect, FormEvent } from 'react';
+
+import React, { useState, useCallback, useEffect, FormEvent, useMemo } from 'react';
 import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
 import HistoryView from './components/HistoryView';
 import GraphView from './components/GraphView';
 import ThemePicker from './components/ThemePicker';
+import BreatheView from './components/BreatheView';
 import { Emotion, Strategy, EmotionLog, EmotionCategory } from './types';
 import { EMOTION_CATEGORIES } from './constants';
 import { useTheme } from './hooks/useTheme';
@@ -196,14 +198,6 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, cate
   );
 };
 
-
-const PlusIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-);
-
 const ClockIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"></circle>
@@ -216,6 +210,15 @@ const GraphIcon = () => (
         <line x1="18" y1="20" x2="18" y2="10" />
         <line x1="12" y1="20" x2="12" y2="4" />
         <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+);
+  
+const BreatheIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M3 12h2.5c1.5 0 2.5-1.5 2.5-3V6.5" />
+        <path d="M8 17.5v-5c0-1.5 1-3 2.5-3H16" />
+        <path d="M16 8.5V6" />
+        <path d="M21 12h-2.5c-1.5 0-2.5 1.5-2.5 3v2.5" />
     </svg>
 );
 
@@ -239,9 +242,9 @@ const App: React.FC = () => {
     }
   });
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
-  const [view, setView] = useState<'selector' | 'strategy' | 'history' | 'graph'>('selector');
+  const [view, setView] = useState<'selector' | 'strategy' | 'history' | 'graph' | 'breathe'>('selector');
   const [isLeaving, setIsLeaving] = useState(false);
-  const { themeId, setThemeId, currentTheme } = useTheme();
+  const { themeId, setThemeId } = useTheme();
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
 
   useEffect(() => {
@@ -253,7 +256,7 @@ const App: React.FC = () => {
   }, [history]);
 
   useEffect(() => {
-    if (['strategy', 'history', 'graph'].includes(view)) {
+    if (['strategy', 'history', 'graph', 'breathe'].includes(view)) {
       document.body.classList.add('strategy-view-active');
     } else {
       document.body.classList.remove('strategy-view-active');
@@ -272,6 +275,7 @@ const App: React.FC = () => {
     setHistory(prev => [newLog, ...prev]);
 
     // Find the current state of the emotion from the nested structure
+    // to ensure strategies are up-to-date
     const allEmotions = emotionCategories.flatMap(c => c.emotions);
     const currentEmotionState = allEmotions.find(e => e.id === emotion.id) || emotion;
     setSelectedEmotion(currentEmotionState);
@@ -418,20 +422,60 @@ const App: React.FC = () => {
     }
     setModalConfig(null);
   };
+  
+  const streak = useMemo(() => {
+    if (!history || history.length === 0) return 0;
 
+    const logDates = history.map(log => log.timestamp);
+    const uniqueDateStrings = [...new Set(logDates.map(ts => new Date(ts).toDateString()))];
+
+    const uniqueDays = uniqueDateStrings
+      .map(dateStr => new Date(dateStr as string).getTime())
+      .sort((a, b) => b - a);
+
+    if (uniqueDays.length === 0) return 0;
+    
+    const today = new Date();
+    const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const yesterdayTime = todayTime - 86400000;
+
+    const lastLogTime = uniqueDays[0];
+    
+    if (lastLogTime < yesterdayTime) return 0;
+
+    let currentStreak = 1;
+    for (let i = 0; i < uniqueDays.length - 1; i++) {
+        const day = uniqueDays[i];
+        const prevDay = uniqueDays[i+1];
+        
+        const expectedPrevDayTime = day - 86400000;
+
+        if (prevDay === expectedPrevDayTime) {
+            currentStreak++;
+        } else {
+            break;
+        }
+    }
+    
+    return currentStreak;
+  }, [history]);
 
   return (
     <>
       <div className="min-h-screen w-full text-[var(--text-primary)] font-sans flex flex-col">
         <header className="w-full bg-[var(--bg-secondary)] shadow-sm sticky top-0 z-10 p-4 border-b border-[var(--border-primary)]">
           <div className="max-w-5xl mx-auto flex justify-center items-center relative h-10">
+            <div className={`absolute left-0 flex items-center space-x-1 font-medium ${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`} title={`${streak}-day streak`}>
+                <span className={`text-xl ${streak > 0 ? '' : 'grayscale'}`}>🔥</span>
+                <span className="text-sm">{streak}</span>
+            </div>
             <div className="text-center">
               <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
                 Emotional Intelligence
               </h1>
               <p className="text-[var(--text-secondary)] text-xs hidden sm:block">An emotional management toolkit.</p>
             </div>
-            <div className="absolute right-0 flex items-center space-x-2">
+            <div className="absolute right-0 flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={() => setView('graph')}
                 className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
@@ -460,6 +504,7 @@ const App: React.FC = () => {
                 onReorder={handleReorderEmotions}
                 onEditClick={(emotion) => setModalConfig({ type: 'emotion', mode: 'edit', emotion })}
                 onDeleteClick={handleDeleteEmotion}
+                onAddEmotionClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
               />
             </div>
             <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'strategy' && !isLeaving ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -492,20 +537,28 @@ const App: React.FC = () => {
                 />
               )}
             </div>
+            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'breathe' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              {view === 'breathe' && (
+                <BreatheView
+                    onBack={() => setView('selector')}
+                />
+              )}
+            </div>
           </div>
         </main>
       </div>
 
       {view === 'selector' && (
         <button 
-            onClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
-            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--text-on-accent)] rounded-full p-4 shadow-lg z-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] transition-transform transform active:scale-95"
-            aria-label="Add new emotion"
+            onClick={() => setView('breathe')}
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--text-on-accent)] rounded-full px-5 py-3 shadow-lg z-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] transition-transform transform active:scale-95 flex items-center space-x-2"
+            aria-label="Breathing exercise"
         >
-            <PlusIcon className="w-6 h-6" />
+            <BreatheIcon className="w-6 h-6" />
+            <span className="font-semibold">Breathe</span>
         </button>
       )}
-
+      
       <EditorModal config={modalConfig} onSave={handleSave} onClose={() => setModalConfig(null)} categories={emotionCategories} />
     </>
   );

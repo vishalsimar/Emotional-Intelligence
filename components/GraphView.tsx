@@ -103,6 +103,7 @@ const GraphView: React.FC<GraphViewProps> = ({ history, onBack }) => {
     }, [history, timeRange]);
 
     const hasData = pieData.length > 0;
+    const hoveredData = hoveredEmotion ? pieData.find(d => d.name === hoveredEmotion) : null;
 
     return (
         <div className="flex flex-col animate-fade-in w-full pb-8">
@@ -145,23 +146,33 @@ const GraphView: React.FC<GraphViewProps> = ({ history, onBack }) => {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
                         <div className="relative w-full max-w-[250px] sm:max-w-[300px]">
                              <svg viewBox="0 0 200 200" role="img" aria-labelledby="chart-title">
-                                <title id="chart-title">A pie chart showing the proportion of logged emotions over the last {timeRange} days.</title>
+                                <title id="chart-title">A donut chart showing the proportion of logged emotions over the last {timeRange} days.</title>
                                 <g>
                                     {pieData.map(slice => {
                                         const isHovered = hoveredEmotion === slice.name;
                                         return (
                                             <path
                                                 key={slice.name}
-                                                d={getArcPath(100, 100, 90, slice.startAngle, slice.endAngle)}
+                                                d={getArcPath(100, 100, 95, slice.startAngle, slice.endAngle, true, 65)}
                                                 style={{ fill: `var(--color-${slice.color}-text)` }}
                                                 onMouseEnter={() => setHoveredEmotion(slice.name)}
                                                 onMouseLeave={() => setHoveredEmotion(null)}
                                                 className="transition-transform duration-200 ease-out"
-                                                transform={isHovered ? 'scale(1.05)' : 'scale(1)'}
+                                                transform={isHovered ? 'scale(1.03)' : 'scale(1)'}
                                                 transform-origin="center"
+                                                aria-label={`${slice.name}: ${slice.percentage.toFixed(1)}%`}
                                             />
                                         );
                                     })}
+                                </g>
+                                <g className="pointer-events-none transition-opacity duration-200" style={{opacity: hoveredData ? 1 : 0}}>
+                                    {hoveredData && (
+                                        <>
+                                            <text x="100" y="90" textAnchor="middle" className="text-4xl" style={{fontSize: '2.5rem'}}>{hoveredData.emoji}</text>
+                                            <text x="100" y="115" textAnchor="middle" className="font-bold fill-[var(--text-primary)]" style={{fontSize: '1rem'}}>{hoveredData.name}</text>
+                                            <text x="100" y="132" textAnchor="middle" className="fill-[var(--text-secondary)]" style={{fontSize: '0.875rem'}}>{hoveredData.percentage.toFixed(1)}%</text>
+                                        </>
+                                    )}
                                 </g>
                             </svg>
                         </div>

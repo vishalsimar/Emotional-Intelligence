@@ -34,3 +34,11 @@ export interface EmotionLog {
   emotionColor: string;
   timestamp: number;
 }
+
+// Fix: Add missing JournalEntry interface used by the JournalView component.
+export interface JournalEntry {
+  id: string;
+  title: string;
+  content: string;
+  timestamp: number;
+}

@@ -118,7 +118,8 @@ const StrategyCard: React.FC<{
 export type StrategyCategory = 'immediate' | 'shortTerm' | 'longTerm';
 
 const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onReorderStrategies, onAddStrategyClick, onEditStrategyClick, onDeleteStrategyClick }) => {
-  const { id: emotionId, name, emoji, strategies, color, helpingOthers } = emotion;
+  const { id: emotionId, name, emoji, color, helpingOthers } = emotion;
+  const strategies = emotion.strategies || { immediate: [], shortTerm: [], longTerm: [] };
   const headingColorClass = `text-[var(--color-${color}-text)]`;
 
   const [visible, setVisible] = useState(false);
@@ -128,9 +129,9 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
     const allStrategies = [
-      ...emotion.strategies.immediate,
-      ...emotion.strategies.shortTerm,
-      ...emotion.strategies.longTerm,
+      ...strategies.immediate,
+      ...strategies.shortTerm,
+      ...strategies.longTerm,
       ...emotion.helpingOthers,
     ];
     const initialCheckedState: Record<string, boolean[]> = {};
@@ -167,6 +168,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   // Touch Drag State
   const dragStartTimeout = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
+  const didDrag = useRef(false);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
     dragItem.current = { category, index };
@@ -195,7 +197,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const handleDrop = () => {
     if (!dragItem.current || !dragOverItem.current || dragItem.current.category !== dragOverItem.current.category || (dragItem.current.index === dragOverItem.current.index)) return;
 
-    const newStrategies = JSON.parse(JSON.stringify(emotion.strategies)); // Deep copy
+    const newStrategies = JSON.parse(JSON.stringify(strategies)); // Deep copy
     const sourceList = newStrategies[dragItem.current.category];
     
     const draggedContent = sourceList[dragItem.current.index];
@@ -207,6 +209,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
 
     // Touch handlers
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, category: StrategyCategory, index: number) => {
+    didDrag.current = false;
     if (dragStartTimeout.current) clearTimeout(dragStartTimeout.current);
     dragStartTimeout.current = window.setTimeout(() => {
         dragItem.current = { category, index };
@@ -220,6 +223,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
     if (!isDraggingRef.current || !dragItem.current) return;
 
+    didDrag.current = true;
     const touch = e.touches[0];
     const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!targetElement) return;
@@ -240,7 +244,9 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   
   const handleTouchEnd = () => {
     if (dragStartTimeout.current) { clearTimeout(dragStartTimeout.current); dragStartTimeout.current = null; }
-    if (isDraggingRef.current) handleDrop();
+    if (isDraggingRef.current && didDrag.current) {
+        handleDrop();
+    }
     handleDragEnd();
     isDraggingRef.current = false;
   };
