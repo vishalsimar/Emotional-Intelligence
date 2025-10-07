@@ -75,23 +75,22 @@ const StrategyCard: React.FC<{
     return (
         <div 
           style={{ transitionDelay: `${delay}ms` }}
-          className={`bg-[var(--bg-secondary)] p-5 rounded-lg border-l-4 border-[var(--color-${color}-border)] transition-all duration-300 ease-out shadow-md group
-          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-          flex items-start`}
+          className={`bg-[var(--bg-secondary)] p-5 rounded-lg border-l-4 border-[var(--color-${color}-border)] transition-all duration-300 ease-out shadow-md group relative
+          ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         >
-            <div className="flex-1">
-                <h4 className="font-bold text-lg text-[var(--text-primary)]">{strategy.title}</h4>
+            <div>
+                <h4 className="font-bold text-lg text-[var(--text-primary)] break-words">{strategy.title}</h4>
                  <ol className="list-none space-y-2 mt-2 text-base">
                     {strategy.steps.map((step, index) => (
                         <li key={index}>
-                            <label className="flex items-center cursor-pointer group/item">
+                            <label className="flex items-start cursor-pointer group/item">
                                 <input
                                     type="checkbox"
                                     checked={checkedState?.[index] || false}
                                     onChange={() => onToggleStep(index)}
-                                    className="form-checkbox h-5 w-5 rounded text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-offset-0 focus:ring-2 focus:ring-[var(--accent-ring)] transition"
+                                    className="form-checkbox h-5 w-5 rounded text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-offset-0 focus:ring-2 focus:ring-[var(--accent-ring)] transition mt-1 flex-shrink-0"
                                 />
-                                <span className={`ml-3 transition ${checkedState?.[index] ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
+                                <span className={`ml-3 flex-1 transition ${checkedState?.[index] ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
                                     {step}
                                 </span>
                             </label>
@@ -99,30 +98,29 @@ const StrategyCard: React.FC<{
                     ))}
                 </ol>
             </div>
-             <div className="flex items-center">
+            
+            <div className="absolute top-3 right-3 flex items-center bg-[var(--bg-tertiary)] rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg border border-[var(--border-primary)]">
                 {hasCheckedStep && (
-                    <button onClick={onReset} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Reset checklist for ${strategy.title}`}>
+                    <button onClick={onReset} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Reset checklist for ${strategy.title}`}>
                         <ResetIcon className="w-4 h-4" />
                     </button>
                 )}
-                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {isDraggable && (
-                        <>
-                            <button onClick={() => onMove('up')} disabled={isFirst} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} up`}>
-                                <ArrowUpIcon className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => onMove('down')} disabled={isLast} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} down`}>
-                                <ArrowDownIcon className="w-4 h-4" />
-                            </button>
-                        </>
-                    )}
-                    <button onClick={onEdit} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
-                        <EditIcon className="w-4 h-4" />
-                    </button>
-                    <button onClick={onDelete} className="p-1.5 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
-                        <TrashIcon className="w-4 h-4" />
-                    </button>
-                </div>
+                {isDraggable && (
+                    <>
+                        <button onClick={() => onMove('up')} disabled={isFirst} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} up`}>
+                            <ArrowUpIcon className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => onMove('down')} disabled={isLast} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} down`}>
+                            <ArrowDownIcon className="w-4 h-4" />
+                        </button>
+                    </>
+                )}
+                <button onClick={onEdit} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
+                    <EditIcon className="w-4 h-4" />
+                </button>
+                <button onClick={onDelete} className="p-1 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
+                    <TrashIcon className="w-4 h-4" />
+                </button>
             </div>
         </div>
     );
