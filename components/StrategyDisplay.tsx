@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Emotion, Strategy } from '../types';
 
 interface StrategyDisplayProps {
@@ -10,20 +10,6 @@ interface StrategyDisplayProps {
   onEditStrategyClick: (category: StrategyCategory | 'helpingOthers', strategy: Strategy) => void;
   onDeleteStrategyClick: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => void;
 }
-
-const ArrowUpIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" y1="19" x2="12" y2="5"></line>
-      <polyline points="5 12 12 5 19 12"></polyline>
-    </svg>
-);
-
-const ArrowDownIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <polyline points="19 12 12 19 5 12"></polyline>
-    </svg>
-);
 
 const EditIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -55,32 +41,71 @@ const ResetIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const ArrowUpIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+);
+
+const ArrowDownIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <polyline points="19 12 12 19 5 12"></polyline>
+    </svg>
+);
+
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>
+);
+
 const StrategyCard: React.FC<{ 
     strategy: Strategy; 
     color: string; 
     visible: boolean; 
     delay: number;
     isDraggable?: boolean;
-    isFirst: boolean;
-    isLast: boolean;
-    onMove: (direction: 'up' | 'down') => void;
+    onMove?: (direction: 'up' | 'down') => void;
     onEdit: () => void; 
     onDelete: () => void;
     checkedState: boolean[];
     onToggleStep: (stepIndex: number) => void;
     onReset: () => void;
-}> = ({ strategy, color, visible, delay, isDraggable = true, isFirst, isLast, onMove, onEdit, onDelete, checkedState, onToggleStep, onReset }) => {
-    const hasCheckedStep = checkedState?.some(Boolean);
+}> = ({ strategy, color, visible, delay, isDraggable = true, onMove, onEdit, onDelete, checkedState, onToggleStep, onReset }) => {
+    
+    const progress = checkedState.length > 0 ? (checkedState.filter(Boolean).length / checkedState.length) * 100 : 0;
     
     return (
         <div 
           style={{ transitionDelay: `${delay}ms` }}
-          className={`bg-[var(--bg-secondary)] p-5 rounded-lg border-l-4 border-[var(--color-${color}-border)] transition-all duration-300 ease-out shadow-md group relative
+          className={`bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] transition-all duration-300 ease-out shadow-sm group overflow-hidden flex flex-col
           ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         >
-            <div>
-                <h4 className="font-bold text-lg text-[var(--text-primary)] break-words">{strategy.title}</h4>
-                 <ol className="list-none space-y-2 mt-2 text-base">
+            <div className="p-5 flex-grow flex flex-col">
+                <div className="flex justify-between items-start mb-3">
+                    <h4 className="font-bold text-lg text-[var(--text-primary)] break-words flex-1 pr-2">{strategy.title}</h4>
+                    
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 flex-shrink-0">
+                        {isDraggable && onMove && (
+                            <>
+                                <button onClick={(e) => { e.stopPropagation(); onMove('up'); }} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Move ${strategy.title} up`}>
+                                    <ArrowUpIcon className="w-4 h-4" />
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); onMove('down'); }} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Move ${strategy.title} down`}>
+                                    <ArrowDownIcon className="w-4 h-4" />
+                                </button>
+                            </>
+                        )}
+                        <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
+                            <EditIcon className="w-4 h-4" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
+                            <TrashIcon className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
+                 <ol className="list-none space-y-3">
                     {strategy.steps.map((step, index) => (
                         <li key={index}>
                             <label className="flex items-start cursor-pointer group/item">
@@ -88,9 +113,12 @@ const StrategyCard: React.FC<{
                                     type="checkbox"
                                     checked={checkedState?.[index] || false}
                                     onChange={() => onToggleStep(index)}
-                                    className="form-checkbox h-5 w-5 rounded text-[var(--accent-primary)] border-[var(--border-secondary)] focus:ring-offset-0 focus:ring-2 focus:ring-[var(--accent-ring)] transition mt-1 flex-shrink-0"
+                                    className="peer sr-only"
                                 />
-                                <span className={`ml-3 flex-1 transition ${checkedState?.[index] ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
+                                <span className={`w-6 h-6 rounded-full border-2 border-[var(--border-secondary)] peer-checked:bg-[var(--accent-primary)] peer-checked:border-[var(--accent-primary)] flex items-center justify-center transition mt-0.5 flex-shrink-0 bg-[var(--bg-primary)] peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-[var(--accent-ring)] ring-offset-[var(--bg-secondary)]`}>
+                                    <svg className="w-4 h-4 text-white transform scale-0 peer-checked:scale-100 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </span>
+                                <span className={`ml-3 flex-1 transition text-base ${checkedState?.[index] ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}`}>
                                     {step}
                                 </span>
                             </label>
@@ -99,29 +127,19 @@ const StrategyCard: React.FC<{
                 </ol>
             </div>
             
-            <div className="absolute top-3 right-3 flex items-center bg-[var(--bg-tertiary)] rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg border border-[var(--border-primary)]">
-                {hasCheckedStep && (
-                    <button onClick={onReset} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Reset checklist for ${strategy.title}`}>
-                        <ResetIcon className="w-4 h-4" />
+            <footer className="px-5 py-3 bg-[var(--bg-tertiary)]/50 border-t border-[var(--border-primary)] flex items-center justify-between">
+                <div className="w-full bg-[var(--bg-hover)] rounded-full h-2.5 overflow-hidden">
+                    <div 
+                        className="h-2.5 rounded-full transition-all duration-500"
+                        style={{ width: `${progress}%`, backgroundColor: `var(--color-${color}-text)` }}
+                    ></div>
+                </div>
+                {progress > 0 && (
+                    <button onClick={onReset} className="ml-3 p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Reset checklist for ${strategy.title}`}>
+                        <ResetIcon className="w-5 h-5" />
                     </button>
                 )}
-                {isDraggable && (
-                    <>
-                        <button onClick={() => onMove('up')} disabled={isFirst} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} up`}>
-                            <ArrowUpIcon className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => onMove('down')} disabled={isLast} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full disabled:opacity-50" aria-label={`Move ${strategy.title} down`}>
-                            <ArrowDownIcon className="w-4 h-4" />
-                        </button>
-                    </>
-                )}
-                <button onClick={onEdit} className="p-1 text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-full" aria-label={`Edit ${strategy.title}`}>
-                    <EditIcon className="w-4 h-4" />
-                </button>
-                <button onClick={onDelete} className="p-1 text-[var(--color-red-text)] hover:bg-[var(--color-red-bg)] rounded-full" aria-label={`Delete ${strategy.title}`}>
-                    <TrashIcon className="w-4 h-4" />
-                </button>
-            </div>
+            </footer>
         </div>
     );
 };
@@ -136,6 +154,11 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const [visible, setVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
   const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
+  const [openSections, setOpenSections] = useState<Record<StrategyCategory, boolean>>({
+    immediate: true,
+    shortTerm: false,
+    longTerm: false,
+  });
   
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
@@ -152,6 +175,10 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     setCheckedSteps(initialCheckedState);
     return () => clearTimeout(timer);
   }, [emotion]);
+  
+  const toggleSection = (category: StrategyCategory) => {
+    setOpenSections(prev => ({ ...prev, [category]: !prev[category] }));
+  };
 
   const handleToggleStep = (strategyId: string, stepIndex: number) => {
     setCheckedSteps(prev => {
@@ -182,40 +209,12 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     
     onReorderStrategies(emotionId, newStrategies);
   };
-
-  const StrategyCategoryList: React.FC<{
-    category: StrategyCategory;
-    title: string;
-    strategies: Strategy[];
-    itemOffset: number;
-  }> = ({ category, title, strategies, itemOffset }) => (
-    <div>
-      <h3 className="text-2xl font-semibold text-[var(--text-primary)]/80 mb-6">{title}</h3>
-      <div className="flex flex-col space-y-4">
-        {strategies.map((strategy, index) => (
-            <StrategyCard
-              key={strategy.id}
-              strategy={strategy}
-              color={color}
-              visible={visible}
-              delay={(itemOffset + index) * 50}
-              isDraggable={true}
-              isFirst={index === 0}
-              isLast={index === strategies.length - 1}
-              onMove={(direction) => handleMoveStrategy(category, index, direction)}
-              checkedState={checkedSteps[strategy.id] || []}
-              onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
-              onReset={() => handleResetSteps(strategy.id)}
-              onEdit={() => onEditStrategyClick(category, strategy)}
-              onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
-            />
-        ))}
-         <button onClick={() => onAddStrategyClick(category)} className="mt-2 w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
-            <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
-        </button>
-      </div>
-    </div>
-  );
+  
+  const STRATEGY_CATEGORIES_CONFIG: { category: StrategyCategory; title: string; icon: string }[] = [
+    { category: "immediate", title: "Immediate", icon: "⚡️" },
+    { category: "shortTerm", title: "Short-Term", icon: "🗓️" },
+    { category: "longTerm", title: "Long-Term", icon: "🧠" },
+  ];
 
   return (
     <div className="flex flex-col animate-fade-in w-full">
@@ -259,30 +258,57 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       </div>
 
       {activeTab === 'me' && (
-        <div className="space-y-10 animate-fade-in-content">
-          <StrategyCategoryList
-            category="immediate"
-            title="⚡️ Immediate Strategies"
-            strategies={strategies.immediate}
-            itemOffset={0}
-          />
-          <StrategyCategoryList
-            category="shortTerm"
-            title="🗓️ Short-Term Strategies"
-            strategies={strategies.shortTerm}
-            itemOffset={strategies.immediate.length}
-          />
-          <StrategyCategoryList
-            category="longTerm"
-            title="🧠 Long-Term Strategies"
-            strategies={strategies.longTerm}
-            itemOffset={strategies.immediate.length + strategies.shortTerm.length}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-8 gap-y-6 animate-fade-in-content">
+          {STRATEGY_CATEGORIES_CONFIG.map(({ category, title, icon }, categoryIndex) => {
+            const categoryStrategies = strategies[category];
+            const itemOffset = STRATEGY_CATEGORIES_CONFIG.slice(0, categoryIndex).reduce((acc, c) => acc + strategies[c.category].length, 0);
+            
+            return (
+              <div key={category} className="space-y-4">
+                <button 
+                  onClick={() => toggleSection(category)}
+                  className="w-full flex justify-between items-center p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] lg:pointer-events-none lg:p-0 lg:bg-transparent lg:border-none"
+                  aria-expanded={openSections[category]}
+                  aria-controls={`section-${category}`}
+                >
+                  <h3 className="text-xl font-semibold text-[var(--text-primary)]/80 flex items-center">
+                    <span className="mr-2">{icon}</span> {title}
+                  </h3>
+                   <span className="ml-2 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] text-xs font-semibold px-2 py-0.5 rounded-full">{categoryStrategies.length}</span>
+                  <ChevronDownIcon className={`w-6 h-6 text-[var(--text-secondary)] transition-transform lg:hidden ${openSections[category] ? 'rotate-180' : ''}`} />
+                </button>
+                <div 
+                  id={`section-${category}`}
+                  className={`space-y-4 transition-all duration-300 ease-in-out overflow-hidden lg:block ${openSections[category] ? 'grid-open' : 'grid-closed'}`}
+                >
+                  {categoryStrategies.map((strategy, index) => (
+                      <StrategyCard
+                        key={strategy.id}
+                        strategy={strategy}
+                        color={color}
+                        visible={visible}
+                        delay={(itemOffset + index) * 50}
+                        isDraggable={true}
+                        onMove={(direction) => handleMoveStrategy(category, index, direction)}
+                        checkedState={checkedSteps[strategy.id] || []}
+                        onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                        onReset={() => handleResetSteps(strategy.id)}
+                        onEdit={() => onEditStrategyClick(category, strategy)}
+                        onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
+                      />
+                  ))}
+                  <button onClick={() => onAddStrategyClick(category)} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
+                      <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
       {activeTab === 'others' && (
-        <div className="space-y-6 animate-fade-in-content">
+        <div className="space-y-6 animate-fade-in-content max-w-2xl">
            <h3 className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2">How to Support Someone Experiencing {name}</h3>
            {helpingOthers.map((strategy, index) => (
              <StrategyCard
@@ -292,8 +318,6 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 visible={visible}
                 delay={index * 50}
                 isDraggable={false}
-                isFirst={true} isLast={true} /* Reordering disabled for this section for now */
-                onMove={() => {}}
                 checkedState={checkedSteps[strategy.id] || []}
                 onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
                 onReset={() => handleResetSteps(strategy.id)}
@@ -301,7 +325,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 onDelete={() => onDeleteStrategyClick(emotionId, 'helpingOthers', strategy.id)}
               />
            ))}
-            <button onClick={() => onAddStrategyClick('helpingOthers')} className="mt-2 w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
+            <button onClick={() => onAddStrategyClick('helpingOthers')} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
                 <PlusIcon className="w-5 h-5 mr-2" /> Add Tip
             </button>
         </div>
@@ -317,29 +341,21 @@ style.innerHTML = `
 .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
 @keyframes fade-in-content { 0% { opacity: 0; } 100% { opacity: 1; } }
 .animate-fade-in-content { animation: fade-in-content 0.4s ease-out forwards; }
-.form-checkbox {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-color: transparent;
-  background-origin: border-box;
-  border: 1px solid var(--border-secondary);
-  padding: 0;
-  display: inline-block;
-  vertical-align: middle;
-  width: 1.25em;
-  height: 1.25em;
-  border-radius: 6px;
-  flex-shrink: 0;
-  cursor: pointer;
+.grid-closed {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
 }
-.form-checkbox:checked {
-  background-color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
+.grid-open {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+@media (min-width: 1024px) {
+    .grid-closed, .grid-open {
+        display: block;
+        opacity: 1;
+    }
 }
 `;
 document.head.appendChild(style);
