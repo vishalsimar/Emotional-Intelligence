@@ -29,6 +29,13 @@ const BreatheView: React.FC<BreatheViewProps> = ({ onBack }) => {
   };
 
   useEffect(() => {
+    // When returning to this view, stop any running animations
+    return () => {
+      stopBreathing();
+    };
+  }, []);
+
+  useEffect(() => {
     if (phase === 'idle') return;
 
     // Countdown timer
@@ -58,19 +65,41 @@ const BreatheView: React.FC<BreatheViewProps> = ({ onBack }) => {
     };
   }, [phase]);
 
-  const getCircleClass = () => {
-    switch(phase) {
-      case 'inhale': return `scale-150 duration-[${PHASES.inhale.duration}s]`;
-      case 'exhale': return `scale-100 duration-[${PHASES.exhale.duration}s]`;
-      case 'hold': return 'scale-150';
-      default: return 'scale-100';
-    }
-  };
-
   const currentInstruction = phase !== 'idle' ? PHASES[phase].instruction : "Ready?";
+  
+  const totalDuration = PHASES.inhale.duration + PHASES.hold.duration + PHASES.exhale.duration;
+  const inhalePercent = (PHASES.inhale.duration / totalDuration) * 100;
+  const holdPercent = ((PHASES.inhale.duration + PHASES.hold.duration) / totalDuration) * 100;
+
+  const animationStyles = `
+    @keyframes breathe-circle {
+      0%, 100% { transform: scale(1); }
+      ${inhalePercent}% { transform: scale(1.5); }
+      ${holdPercent}% { transform: scale(1.5); }
+    }
+    @keyframes rotate-dot {
+      0% { transform: rotate(-90deg); }
+      ${inhalePercent}% { transform: rotate(90deg); }
+      ${holdPercent}% { transform: rotate(90deg); }
+      100% { transform: rotate(270deg); }
+    }
+    .anim-running {
+        animation-duration: ${totalDuration}s;
+        animation-iteration-count: infinite;
+    }
+    .anim-circle {
+        animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+        animation-name: breathe-circle;
+    }
+    .anim-dot {
+        animation-timing-function: linear;
+        animation-name: rotate-dot;
+    }
+  `;
 
   return (
     <div className="flex flex-col animate-fade-in w-full pb-8 h-[75vh]">
+      <style>{animationStyles}</style>
       <header className="flex items-center justify-between mb-8">
         <div className="flex items-center">
           <button
@@ -88,7 +117,23 @@ const BreatheView: React.FC<BreatheViewProps> = ({ onBack }) => {
       
       <div className="flex-grow flex flex-col items-center justify-center space-y-12">
         <div className="relative w-64 h-64 flex items-center justify-center">
-            <div className={`absolute inset-0 bg-[var(--accent-primary)]/10 rounded-full transition-transform ease-linear ${getCircleClass()}`} />
+            {/* Animated expanding/contracting circle */}
+            <div
+              className={`absolute inset-0 bg-[var(--accent-primary)]/10 rounded-full ${phase !== 'idle' ? 'anim-running anim-circle' : 'scale-100 transition-transform'}`}
+            />
+            {/* Static outer track */}
+            <div className="absolute w-full h-full rounded-full border-2 border-[var(--accent-primary)]/20" />
+
+            {/* The rotating container for the dot */}
+            {phase !== 'idle' && (
+              <div className="absolute w-full h-full anim-running anim-dot">
+                {/* The dot */}
+                <div className="absolute top-1/2 left-0 -mt-2 -ml-2 w-4 h-4">
+                  <div className="w-full h-full rounded-full bg-[var(--accent-primary)] shadow-lg" />
+                </div>
+              </div>
+            )}
+            
             <div className="relative z-10 text-center">
                 <p className="text-2xl font-semibold text-[var(--text-secondary)] mb-2">{currentInstruction}</p>
                 {phase !== 'idle' && <p className="text-6xl font-bold text-[var(--accent-primary)]">{count}</p>}
