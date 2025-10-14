@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Emotion, EmotionCategory } from '../types';
 
@@ -95,7 +94,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
       <button
         onClick={() => onSelectEmotion(emotion)}
         style={{ transitionDelay: `${index * 50}ms` }}
-        className={`p-4 rounded-2xl shadow-md transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative
+        className={`p-4 rounded-2xl shadow-md transition-all duration-300 ease-out-quad transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] text-center border group relative active:scale-95 group-hover:scale-[1.02]
         ${colorClasses}
         ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         aria-label={`Select ${emotion.name}`}
@@ -123,7 +122,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
      <button
         onClick={onAddEmotionClick}
         style={{ transitionDelay: `${categories.flatMap(c => c.emotions).length * 50}ms` }}
-        className={`p-4 rounded-2xl transition-all duration-300 ease-out transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] text-center border-2 border-dashed border-[var(--border-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-primary)] group flex flex-col justify-center items-center
+        className={`p-4 rounded-2xl transition-all duration-300 ease-out-quad transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)] text-center border-2 border-dashed border-[var(--border-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-primary)] group flex flex-col justify-center items-center active:scale-95 hover:scale-[1.02]
         ${isRendered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         aria-label="Add new emotion"
     >

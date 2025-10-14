@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, FormEvent, useMemo } from 'react';
 import EmotionSelector from './components/EmotionSelector';
 import StrategyDisplay, { StrategyCategory } from './components/StrategyDisplay';
@@ -6,7 +5,11 @@ import HistoryView from './components/HistoryView';
 import GraphView from './components/GraphView';
 import ThemePicker from './components/ThemePicker';
 import BreatheView from './components/BreatheView';
-import { Emotion, Strategy, EmotionLog, EmotionCategory } from './types';
+import JournalView from './components/JournalView';
+import FirstAidView from './components/FirstAidView';
+import SimpleStrategyView from './components/SimpleStrategyView';
+import PhilosophyModal from './components/PhilosophyModal'; // Import the new modal
+import { Emotion, Strategy, EmotionLog, EmotionCategory, JournalEntry } from './types';
 import { EMOTION_CATEGORIES } from './constants';
 import { useTheme } from './hooks/useTheme';
 
@@ -212,6 +215,13 @@ const GraphIcon = () => (
         <line x1="6" y1="20" x2="6" y2="14" />
     </svg>
 );
+
+const JournalIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+);
   
 const BreatheIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -221,6 +231,16 @@ const BreatheIcon = ({ className }: { className?: string }) => (
         <path d="M21 12h-2.5c-1.5 0-2.5 1.5-2.5 3v2.5" />
     </svg>
 );
+
+const InfoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+);
+
+type View = 'firstAid' | 'selector' | 'strategy' | 'quickStrategy' | 'history' | 'graph' | 'breathe' | 'journal';
 
 const App: React.FC = () => {
   const [emotionCategories, setEmotionCategories] = useState<EmotionCategory[]>(() => {
@@ -241,11 +261,23 @@ const App: React.FC = () => {
       return [];
     }
   });
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => {
+    try {
+        const saved = localStorage.getItem('journalEntries');
+        return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+        console.error("Failed to parse journal entries from localStorage", error);
+        return [];
+    }
+  });
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
-  const [view, setView] = useState<'selector' | 'strategy' | 'history' | 'graph' | 'breathe'>('selector');
+  const [view, setView] = useState<View>('firstAid');
+  const [quickStrategyType, setQuickStrategyType] = useState<'overwhelmed' | 'down' | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const { themeId, setThemeId } = useTheme();
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
+  const [isPhilosophyModalOpen, setIsPhilosophyModalOpen] = useState(false);
+
 
   useEffect(() => {
     localStorage.setItem('emotionCategories', JSON.stringify(emotionCategories));
@@ -256,7 +288,11 @@ const App: React.FC = () => {
   }, [history]);
 
   useEffect(() => {
-    if (['strategy', 'history', 'graph', 'breathe'].includes(view)) {
+    localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+  }, [journalEntries]);
+
+  useEffect(() => {
+    if (['strategy', 'history', 'graph', 'breathe', 'journal', 'quickStrategy'].includes(view)) {
       document.body.classList.add('strategy-view-active');
     } else {
       document.body.classList.remove('strategy-view-active');
@@ -274,15 +310,13 @@ const App: React.FC = () => {
     };
     setHistory(prev => [newLog, ...prev]);
 
-    // Find the current state of the emotion from the nested structure
-    // to ensure strategies are up-to-date
     const allEmotions = emotionCategories.flatMap(c => c.emotions);
     const currentEmotionState = allEmotions.find(e => e.id === emotion.id) || emotion;
     setSelectedEmotion(currentEmotionState);
     setView('strategy');
   }, [emotionCategories]);
 
-  const handleGoBack = useCallback(() => {
+  const handleGoBackToSelector = useCallback(() => {
     setIsLeaving(true);
     setTimeout(() => {
       setSelectedEmotion(null);
@@ -291,6 +325,34 @@ const App: React.FC = () => {
     }, 300);
   }, []);
   
+  const handleGoBackToFirstAid = useCallback(() => {
+     setView('firstAid');
+  }, []);
+  
+  const allEmotions = useMemo(() => emotionCategories.flatMap(c => c.emotions), [emotionCategories]);
+
+  const overwhelmedStrategies = useMemo(() => {
+      const anger = allEmotions.find(e => e.name === 'Anger');
+      const fear = allEmotions.find(e => e.name === 'Fear');
+      const anticipation = allEmotions.find(e => e.name === 'Anticipation');
+      let strategies: Strategy[] = [];
+      if (anger) strategies.push(...anger.strategies.immediate);
+      if (fear) strategies.push(...fear.strategies.immediate);
+      if (anticipation) strategies.push(...anticipation.strategies.immediate);
+      const uniqueStrategies = strategies.reduce<Strategy[]>((acc, current) => {
+          if (!acc.some(item => item.title === current.title)) {
+              acc.push(current);
+          }
+          return acc;
+      }, []);
+      return uniqueStrategies;
+  }, [allEmotions]);
+
+  const downStrategies = useMemo(() => {
+      const sadness = allEmotions.find(e => e.name === 'Sadness');
+      return sadness ? sadness.strategies.immediate : [];
+  }, [allEmotions]);
+
   const handleReorderEmotions = useCallback((categoryId: string, reorderedEmotions: Emotion[]) => {
     setEmotionCategories(prev => prev.map(cat => 
         cat.id === categoryId 
@@ -322,6 +384,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSaveJournalEntry = (entry: JournalEntry) => {
+    setJournalEntries(prev => {
+        const index = prev.findIndex(e => e.id === entry.id);
+        if (index > -1) {
+            const newEntries = [...prev];
+            newEntries[index] = entry;
+            return newEntries;
+        }
+        return [entry, ...prev];
+    });
+  };
+
+  const handleDeleteJournalEntry = (entryId: string) => {
+    if (window.confirm('Are you sure you want to delete this journal entry?')) {
+        setJournalEntries(prev => prev.filter(e => e.id !== entryId));
+    }
+  };
+
+
   // --- CRUD Handlers ---
   const handleDeleteEmotion = (emotionId: string) => {
     if (window.confirm('Are you sure you want to delete this emotion and all its strategies? This cannot be undone.')) {
@@ -330,7 +411,6 @@ const App: React.FC = () => {
             ...cat,
             emotions: cat.emotions.filter(e => e.id !== emotionId),
         }))
-        // Remove any new categories that become empty, but keep the original ones
         .filter(cat => cat.emotions.length > 0 || ['cat-basic', 'cat-complex'].includes(cat.id))
       );
     }
@@ -460,6 +540,50 @@ const App: React.FC = () => {
     return currentStreak;
   }, [history]);
 
+  const renderContent = () => {
+    switch (view) {
+      case 'firstAid':
+        return <FirstAidView 
+          onSelect={(type) => { setQuickStrategyType(type); setView('quickStrategy'); }} 
+          onBreathe={() => setView('breathe')} 
+          onBrowseAll={() => setView('selector')} 
+        />;
+      case 'selector':
+        return <EmotionSelector 
+          categories={emotionCategories} 
+          onSelectEmotion={handleSelectEmotion} 
+          onReorder={handleReorderEmotions}
+          onEditClick={(emotion) => setModalConfig({ type: 'emotion', mode: 'edit', emotion })}
+          onDeleteClick={handleDeleteEmotion}
+          onAddEmotionClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
+        />;
+      case 'strategy':
+        return selectedEmotion && <StrategyDisplay 
+          key={selectedEmotion.id}
+          emotion={selectedEmotion} 
+          onBack={handleGoBackToSelector} 
+          onReorderStrategies={handleReorderStrategies}
+          onAddStrategyClick={(category) => setModalConfig({ type: 'strategy', mode: 'add', emotionId: selectedEmotion.id, category })}
+          onEditStrategyClick={(category, strategy) => setModalConfig({ type: 'strategy', mode: 'edit', emotionId: selectedEmotion.id, category, strategy })}
+          onDeleteStrategyClick={handleDeleteStrategy}
+        />;
+      case 'quickStrategy':
+        return quickStrategyType === 'overwhelmed' ? 
+          <SimpleStrategyView title="To Help You Feel Grounded" emotionColor="purple" emotionName="feeling overwhelmed" strategies={overwhelmedStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} /> :
+          <SimpleStrategyView title="A Few Gentle Things to Try" emotionColor="blue" emotionName="feeling down" strategies={downStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} />;
+      case 'history':
+        return <HistoryView history={history} onBack={() => setView('firstAid')} onClearHistory={handleClearHistory} />;
+      case 'graph':
+        return <GraphView history={history} onBack={() => setView('firstAid')} />;
+      case 'breathe':
+        return <BreatheView onBack={() => setView('firstAid')} />;
+      case 'journal':
+        return <JournalView entries={journalEntries} onSave={handleSaveJournalEntry} onDelete={handleDeleteJournalEntry} onBack={() => setView('firstAid')} />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <>
       <div className="min-h-screen w-full text-[var(--text-primary)] font-sans flex flex-col">
@@ -476,6 +600,20 @@ const App: React.FC = () => {
               <p className="text-[var(--text-secondary)] text-xs hidden sm:block">An emotional management toolkit.</p>
             </div>
             <div className="flex-shrink-0 flex items-center space-x-1 sm:space-x-2">
+              <button
+                onClick={() => setIsPhilosophyModalOpen(true)}
+                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                aria-label="About this app"
+              >
+                <InfoIcon />
+              </button>
+               <button
+                onClick={() => setView('journal')}
+                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                aria-label="View journal"
+              >
+                <JournalIcon />
+              </button>
               <button
                 onClick={() => setView('graph')}
                 className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
@@ -496,55 +634,7 @@ const App: React.FC = () => {
         </header>
         
         <main className="w-full max-w-5xl mx-auto flex-grow p-4 sm:p-6 md:p-8">
-          <div className="relative w-full">
-            <div className={`transition-opacity duration-300 ease-in-out ${view !== 'selector' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <EmotionSelector 
-                categories={emotionCategories} 
-                onSelectEmotion={handleSelectEmotion} 
-                onReorder={handleReorderEmotions}
-                onEditClick={(emotion) => setModalConfig({ type: 'emotion', mode: 'edit', emotion })}
-                onDeleteClick={handleDeleteEmotion}
-                onAddEmotionClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
-              />
-            </div>
-            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'strategy' && !isLeaving ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              {selectedEmotion && (
-                <StrategyDisplay 
-                  key={selectedEmotion.id} // Re-mount when emotion changes to reset animations
-                  emotion={selectedEmotion} 
-                  onBack={handleGoBack} 
-                  onReorderStrategies={handleReorderStrategies}
-                  onAddStrategyClick={(category) => setModalConfig({ type: 'strategy', mode: 'add', emotionId: selectedEmotion.id, category })}
-                  onEditStrategyClick={(category, strategy) => setModalConfig({ type: 'strategy', mode: 'edit', emotionId: selectedEmotion.id, category, strategy })}
-                  onDeleteStrategyClick={handleDeleteStrategy}
-                />
-              )}
-            </div>
-             <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'history' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              {view === 'history' && (
-                <HistoryView 
-                  history={history}
-                  onBack={() => setView('selector')}
-                  onClearHistory={handleClearHistory}
-                />
-              )}
-            </div>
-            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'graph' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              {view === 'graph' && (
-                <GraphView
-                    history={history}
-                    onBack={() => setView('selector')}
-                />
-              )}
-            </div>
-            <div className={`absolute top-0 left-0 w-full transition-all duration-300 ease-in-out ${view === 'breathe' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              {view === 'breathe' && (
-                <BreatheView
-                    onBack={() => setView('selector')}
-                />
-              )}
-            </div>
-          </div>
+            {renderContent()}
         </main>
       </div>
 
@@ -560,6 +650,7 @@ const App: React.FC = () => {
       )}
       
       <EditorModal config={modalConfig} onSave={handleSave} onClose={() => setModalConfig(null)} categories={emotionCategories} />
+      {isPhilosophyModalOpen && <PhilosophyModal onClose={() => setIsPhilosophyModalOpen(false)} />}
     </>
   );
 };
