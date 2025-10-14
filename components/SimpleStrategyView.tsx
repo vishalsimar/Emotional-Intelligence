@@ -1,18 +1,24 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Strategy } from '../types';
 import StrategyCard from './StrategyCard';
+import { StrategyCategory } from './StrategyDisplay';
+
+type StrategyWithOrigin = Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' };
 
 interface SimpleStrategyViewProps {
     title: string;
     emotionColor: string;
     emotionName: string;
-    strategies: Strategy[];
+    strategies: StrategyWithOrigin[];
     onBack: () => void;
     onFindMore: () => void;
+    onEditStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategy: Strategy) => void;
+    onDeleteStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => void;
 }
 
-const SimpleStrategyView: React.FC<SimpleStrategyViewProps> = ({ title, emotionColor, emotionName, strategies, onBack, onFindMore }) => {
+const SimpleStrategyView: React.FC<SimpleStrategyViewProps> = ({ title, emotionColor, emotionName, strategies, onBack, onFindMore, onEditStrategy, onDeleteStrategy }) => {
     const [visible, setVisible] = useState(false);
     const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
 
@@ -68,10 +74,12 @@ const SimpleStrategyView: React.FC<SimpleStrategyViewProps> = ({ title, emotionC
                         color={emotionColor}
                         visible={visible}
                         delay={index * 50}
-                        showControls={false}
+                        showControls={true}
                         checkedState={checkedSteps[strategy.id] || []}
                         onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
                         onReset={() => handleResetSteps(strategy.id)}
+                        onEdit={() => onEditStrategy(strategy.originEmotionId, strategy.originCategory, strategy)}
+                        onDelete={() => onDeleteStrategy(strategy.originEmotionId, strategy.originCategory, strategy.id)}
                     />
                 ))}
             </div>

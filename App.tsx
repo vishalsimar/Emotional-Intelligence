@@ -335,11 +335,12 @@ const App: React.FC = () => {
       const anger = allEmotions.find(e => e.name === 'Anger');
       const fear = allEmotions.find(e => e.name === 'Fear');
       const anticipation = allEmotions.find(e => e.name === 'Anticipation');
-      let strategies: Strategy[] = [];
-      if (anger) strategies.push(...anger.strategies.immediate);
-      if (fear) strategies.push(...fear.strategies.immediate);
-      if (anticipation) strategies.push(...anticipation.strategies.immediate);
-      const uniqueStrategies = strategies.reduce<Strategy[]>((acc, current) => {
+      let strategies: (Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' })[] = [];
+      if (anger) strategies.push(...anger.strategies.immediate.map(s => ({ ...s, originEmotionId: anger.id, originCategory: 'immediate' as const })));
+      if (fear) strategies.push(...fear.strategies.immediate.map(s => ({ ...s, originEmotionId: fear.id, originCategory: 'immediate' as const })));
+      if (anticipation) strategies.push(...anticipation.strategies.immediate.map(s => ({ ...s, originEmotionId: anticipation.id, originCategory: 'immediate' as const })));
+      
+      const uniqueStrategies = strategies.reduce<(Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' })[]>((acc, current) => {
           if (!acc.some(item => item.title === current.title)) {
               acc.push(current);
           }
@@ -350,7 +351,7 @@ const App: React.FC = () => {
 
   const downStrategies = useMemo(() => {
       const sadness = allEmotions.find(e => e.name === 'Sadness');
-      return sadness ? sadness.strategies.immediate : [];
+      return sadness ? sadness.strategies.immediate.map(s => ({ ...s, originEmotionId: sadness.id, originCategory: 'immediate' as const })) : [];
   }, [allEmotions]);
 
   const handleReorderEmotions = useCallback((categoryId: string, reorderedEmotions: Emotion[]) => {
@@ -404,6 +405,10 @@ const App: React.FC = () => {
 
 
   // --- CRUD Handlers ---
+  const handleEditStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers', strategy: Strategy) => {
+    setModalConfig({ type: 'strategy', mode: 'edit', emotionId, category, strategy });
+  };
+  
   const handleDeleteEmotion = (emotionId: string) => {
     if (window.confirm('Are you sure you want to delete this emotion and all its strategies? This cannot be undone.')) {
       setEmotionCategories(prev => prev
@@ -556,6 +561,7 @@ const App: React.FC = () => {
           onEditClick={(emotion) => setModalConfig({ type: 'emotion', mode: 'edit', emotion })}
           onDeleteClick={handleDeleteEmotion}
           onAddEmotionClick={() => setModalConfig({ type: 'emotion', mode: 'add' })}
+          onBack={handleGoBackToFirstAid}
         />;
       case 'strategy':
         return selectedEmotion && <StrategyDisplay 
@@ -569,8 +575,8 @@ const App: React.FC = () => {
         />;
       case 'quickStrategy':
         return quickStrategyType === 'overwhelmed' ? 
-          <SimpleStrategyView title="To Help You Feel Grounded" emotionColor="purple" emotionName="feeling overwhelmed" strategies={overwhelmedStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} /> :
-          <SimpleStrategyView title="A Few Gentle Things to Try" emotionColor="blue" emotionName="feeling down" strategies={downStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} />;
+          <SimpleStrategyView title="To Help You Feel Grounded" emotionColor="purple" emotionName="feeling overwhelmed" strategies={overwhelmedStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} onEditStrategy={handleEditStrategy} onDeleteStrategy={handleDeleteStrategy} /> :
+          <SimpleStrategyView title="A Few Gentle Things to Try" emotionColor="blue" emotionName="feeling down" strategies={downStrategies} onBack={handleGoBackToFirstAid} onFindMore={() => setView('selector')} onEditStrategy={handleEditStrategy} onDeleteStrategy={handleDeleteStrategy} />;
       case 'history':
         return <HistoryView history={history} onBack={() => setView('firstAid')} onClearHistory={handleClearHistory} />;
       case 'graph':

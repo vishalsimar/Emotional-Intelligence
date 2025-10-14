@@ -8,6 +8,7 @@ interface EmotionSelectorProps {
   onEditClick: (emotion: Emotion) => void;
   onDeleteClick: (emotionId: string) => void;
   onAddEmotionClick: () => void;
+  onBack: () => void;
 }
 
 const ArrowUpIcon = ({ className }: { className?: string }) => (
@@ -47,7 +48,7 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick, onAddEmotionClick }) => {
+const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick, onAddEmotionClick, onBack }) => {
   const [isRendered, setIsRendered] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
@@ -133,7 +134,16 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] mb-2">How are you feeling?</h2>
+      <div className="relative w-full text-center mb-2">
+            <button
+                onClick={onBack}
+                className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors"
+                aria-label="Go back"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </button>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)]">How are you feeling?</h2>
+      </div>
       <p className="text-[var(--text-secondary)] mb-8 text-center">Select a feeling to explore management strategies.</p>
 
       <div className="w-full space-y-10 pb-20">
