@@ -92,6 +92,58 @@ const roseQuartzPalette = {
 
 const oceanicPalette = defaultDarkPalette; // Can be customized further
 
+const serenePalette = {
+    red:    { base: '208, 135, 112', hover: '208, 135, 112', text: '#d08770', ring: '#d08770' },
+    blue:   { base: '129, 161, 193', hover: '129, 161, 193', text: '#81a1c1', ring: '#81a1c1' },
+    purple: { base: '180, 142, 173', hover: '180, 142, 173', text: '#b48ead', ring: '#b48ead' },
+    yellow: { base: '235, 203, 139', hover: '235, 203, 139', text: '#ebcb8b', ring: '#ebcb8b' },
+    green:  { base: '163, 190, 140', hover: '163, 190, 140', text: '#a3be8c', ring: '#a3be8c' },
+    orange: { base: '208, 135, 112', hover: '208, 135, 112', text: '#d08770', ring: '#d08770' },
+    slate:  { base: '216, 222, 233', hover: '216, 222, 233', text: '#4c566a', ring: '#d8dee9' },
+    teal:   { base: '143, 188, 187', hover: '143, 188, 187', text: '#8fbcbb', ring: '#8fbcbb' },
+    indigo: { base: '129, 161, 193', hover: '129, 161, 193', text: '#81a1c1', ring: '#81a1c1' },
+    stone:  { base: '229, 233, 240', hover: '229, 233, 240', text: '#4c566a', ring: '#e5e9f0' },
+    lime:   { base: '163, 190, 140', hover: '163, 190, 140', text: '#a3be8c', ring: '#a3be8c' },
+    rose:   { base: '191, 97, 106',  hover: '191, 97, 106',  text: '#bf616a', ring: '#bf616a' },
+    cyan:   { base: '136, 192, 208', hover: '136, 192, 208', text: '#88c0d0', ring: '#88c0d0' },
+    sky:    { base: '136, 192, 208', hover: '136, 192, 208', text: '#88c0d0', ring: '#88c0d0' },
+};
+
+const evergreenPalette = {
+    red:    { base: '191, 97, 106',  hover: '191, 97, 106',  text: '#bf616a', ring: '#bf616a' },
+    blue:   { base: '129, 161, 193', hover: '129, 161, 193', text: '#81a1c1', ring: '#81a1c1' },
+    purple: { base: '180, 142, 173', hover: '180, 142, 173', text: '#b48ead', ring: '#b48ead' },
+    yellow: { base: '235, 203, 139', hover: '235, 203, 139', text: '#ebcb8b', ring: '#ebcb8b' },
+    green:  { base: '163, 190, 140', hover: '163, 190, 140', text: '#a3be8c', ring: '#a3be8c' },
+    orange: { base: '208, 135, 112', hover: '208, 135, 112', text: '#d08770', ring: '#d08770' },
+    slate:  { base: '76, 86, 106',   hover: '76, 86, 106',   text: '#d8dee9', ring: '#d8dee9' },
+    teal:   { base: '143, 188, 187', hover: '143, 188, 187', text: '#8fbcbb', ring: '#8fbcbb' },
+    indigo: { base: '129, 161, 193', hover: '129, 161, 193', text: '#81a1c1', ring: '#81a1c1' },
+    stone:  { base: '76, 86, 106',   hover: '76, 86, 106',   text: '#d8dee9', ring: '#d8dee9' },
+    lime:   { base: '163, 190, 140', hover: '163, 190, 140', text: '#a3be8c', ring: '#a3be8c' },
+    rose:   { base: '191, 97, 106',  hover: '191, 97, 106',  text: '#bf616a', ring: '#bf616a' },
+    cyan:   { base: '136, 192, 208', hover: '136, 192, 208', text: '#88c0d0', ring: '#88c0d0' },
+    sky:    { base: '136, 192, 208', hover: '136, 192, 208', text: '#88c0d0', ring: '#88c0d0' },
+};
+
+const sunsetPalette = {
+    red:    { base: '255, 137, 137', hover: '255, 137, 137', text: '#ff8989', ring: '#ff8989' },
+    blue:   { base: '119, 181, 254', hover: '119, 181, 254', text: '#77b5fe', ring: '#77b5fe' },
+    purple: { base: '179, 157, 219', hover: '179, 157, 219', text: '#b39ddb', ring: '#b39ddb' },
+    yellow: { base: '249, 215, 126', hover: '249, 215, 126', text: '#f9d77e', ring: '#f9d77e' },
+    green:  { base: '110, 227, 208', hover: '110, 227, 208', text: '#6ee3d0', ring: '#6ee3d0' },
+    orange: { base: '255, 171, 153', hover: '255, 171, 153', text: '#ffab99', ring: '#ffab99' },
+    slate:  { base: '167, 180, 202', hover: '167, 180, 202', text: '#a7b4ca', ring: '#a7b4ca' },
+    teal:   { base: '92, 225, 230',  hover: '92, 225, 230',  text: '#5ce1e6', ring: '#5ce1e6' },
+    indigo: { base: '159, 168, 218', hover: '159, 168, 218', text: '#9fa8da', ring: '#9fa8da' },
+    stone:  { base: '189, 189, 189', hover: '189, 189, 189', text: '#bdbdbd', ring: '#bdbdbd' },
+    lime:   { base: '220, 237, 200', hover: '220, 237, 200', text: '#dcedc8', ring: '#dcedc8' },
+    rose:   { base: '244, 143, 177', hover: '244, 143, 177', text: '#f48fb1', ring: '#f48fb1' },
+    cyan:   { base: '128, 222, 234', hover: '128, 222, 234', text: '#80deea', ring: '#80deea' },
+    sky:    { base: '144, 202, 249', hover: '144, 202, 249', text: '#90caf9', ring: '#90caf9' },
+};
+
+
 export const themes: { [key: string]: Theme } = {
     'default-light': {
         name: 'Default Light',
@@ -131,6 +183,66 @@ export const themes: { [key: string]: Theme } = {
             '--accent-ring': '#c084fc',
             '--shadow-color': 'rgba(0,0,0,0.5)',
             ...generateThemeColors(true, defaultDarkPalette)
+        },
+    },
+    'serene': {
+        name: 'Serene',
+        isDark: false,
+        properties: {
+            '--bg-primary': '#f5f7fa',
+            '--bg-secondary': '#ffffff',
+            '--bg-tertiary': '#eef2f7',
+            '--bg-hover': '#eef2f7',
+            '--text-primary': '#2d3748',
+            '--text-secondary': '#718096',
+            '--text-on-accent': '#ffffff',
+            '--border-primary': '#e2e8f0',
+            '--border-secondary': '#cbd5e1',
+            '--accent-primary': '#81a1c1',
+            '--accent-primary-hover': '#5e81ac',
+            '--accent-ring': '#88c0d0',
+            '--shadow-color': 'rgba(45, 55, 72, 0.1)',
+            ...generateThemeColors(false, serenePalette)
+        },
+    },
+    'evergreen': {
+        name: 'Evergreen',
+        isDark: true,
+        properties: {
+            '--bg-primary': '#1a201c',
+            '--bg-secondary': '#222b25',
+            '--bg-tertiary': '#2d3a31',
+            '--bg-hover': '#2d3a31',
+            '--text-primary': '#e2e8f0',
+            '--text-secondary': '#a0aec0',
+            '--text-on-accent': '#ffffff',
+            '--border-primary': '#3a4a3f',
+            '--border-secondary': '#4a5e52',
+            '--accent-primary': '#a3be8c',
+            '--accent-primary-hover': '#b4d0a1',
+            '--accent-ring': '#a3be8c',
+            '--shadow-color': 'rgba(0,0,0,0.5)',
+            ...generateThemeColors(true, evergreenPalette)
+        },
+    },
+     'sunset': {
+        name: 'Sunset',
+        isDark: true,
+        properties: {
+            '--bg-primary': '#202030',
+            '--bg-secondary': '#2a2a40',
+            '--bg-tertiary': '#353550',
+            '--bg-hover': '#353550',
+            '--text-primary': '#f0f0f5',
+            '--text-secondary': '#b0b0c0',
+            '--text-on-accent': '#000000',
+            '--border-primary': '#404060',
+            '--border-secondary': '#505070',
+            '--accent-primary': '#ff8c70',
+            '--accent-primary-hover': '#ffa080',
+            '--accent-ring': '#ff8c70',
+            '--shadow-color': 'rgba(0,0,0,0.5)',
+            ...generateThemeColors(true, sunsetPalette)
         },
     },
     'rose-quartz': {

@@ -29,7 +29,7 @@ const FirstAidView: React.FC<FirstAidViewProps> = ({ onSelect, onBreathe, onBrow
 
     return (
         <div className="flex flex-col items-center justify-center text-center w-full min-h-[60vh] animate-fade-in">
-            <h1 className={`${baseClass} ${isRendered ? renderedClass : initialClass} text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4`} style={{ transitionDelay: '100ms' }}>
+            <h1 className={`${baseClass} ${isRendered ? renderedClass : initialClass} text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4 font-serif`} style={{ transitionDelay: '100ms' }}>
                 How are you feeling right now?
             </h1>
             <p className={`${baseClass} ${isRendered ? renderedClass : initialClass} text-lg text-[var(--text-secondary)] mb-12 max-w-md`} style={{ transitionDelay: '200ms' }}>

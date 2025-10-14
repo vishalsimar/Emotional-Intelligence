@@ -60,7 +60,7 @@ const JournalEditor: React.FC<{
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Entry title..."
-                className="text-2xl sm:text-3xl font-bold bg-transparent focus:outline-none mb-4 pb-2 border-b border-[var(--border-primary)] w-full"
+                className="text-2xl sm:text-3xl font-bold bg-transparent focus:outline-none mb-4 pb-2 border-b border-[var(--border-primary)] w-full font-serif"
             />
             <textarea
                 value={content}
@@ -131,7 +131,7 @@ const JournalView: React.FC<JournalViewProps> = ({ entries, onSave, onDelete, on
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
                     </button>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)]">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] font-serif">
                         Journal
                     </h2>
                 </div>

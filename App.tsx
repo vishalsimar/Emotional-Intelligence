@@ -600,7 +600,7 @@ const App: React.FC = () => {
                 <span className="text-sm">{streak}</span>
             </div>
             <div className="text-center flex-1 min-w-0 px-2">
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] truncate font-serif">
                 Emotional Intelligence
               </h1>
               <p className="text-[var(--text-secondary)] text-xs hidden sm:block">An emotional management toolkit.</p>

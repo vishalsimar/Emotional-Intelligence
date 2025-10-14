@@ -11,14 +11,15 @@
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Nunito Sans', 'sans-serif'],
+              serif: ['Lora', 'serif'],
             },
             transitionTimingFunction: {
               'ease-out-quad': 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -78,8 +79,8 @@
       
       /* ::before holds the main (emotion selector) background */
       body::before {
-        --bg-pattern-light: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle fill="%23000000" cx="10" cy="10" r="1" fill-opacity="0.05"></circle></svg>');
-        --bg-pattern-dark: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle fill="%23ffffff" cx="10" cy="10" r="1" fill-opacity="0.05"></circle></svg>');
+        --bg-pattern-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3e%3cdefs%3e%3clinearGradient id='a' gradientTransform='rotate(45 0 0)'%3e%3cstop offset='0' stop-color='%23A8B2C3' stop-opacity='.1'/%3e%3cstop offset='1' stop-color='%23C2CAD6' stop-opacity='0'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23a)' d='M0 100 C40 110, 60 90, 100 100 C140 110, 160 90, 200 100 L200 200 L0 200 Z' transform='translate(0, -50)'/%3e%3cpath fill='url(%23a)' d='M0 100 C40 90, 60 110, 100 100 C140 90, 160 110, 200 100 L200 200 L0 200 Z' transform='translate(0, -100)'/%3e%3c/svg%3e");
+        --bg-pattern-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3e%3cdefs%3e%3clinearGradient id='a' gradientTransform='rotate(45 0 0)'%3e%3cstop offset='0' stop-color='%23FFFFFF' stop-opacity='.08'/%3e%3cstop offset='1' stop-color='%23FFFFFF' stop-opacity='0'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23a)' d='M0 100 C40 110, 60 90, 100 100 C140 110, 160 90, 200 100 L200 200 L0 200 Z' transform='translate(0, -50)'/%3e%3cpath fill='url(%23a)' d='M0 100 C40 90, 60 110, 100 100 C140 90, 160 110, 200 100 L200 200 L0 200 Z' transform='translate(0, -100)'/%3e%3c/svg%3e");
         background-image: var(--bg-pattern-light);
         opacity: 1;
       }
@@ -89,8 +90,8 @@
       
       /* ::after holds the secondary (strategy view) background */
       body::after {
-        --bg-strategy-light: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="%239ca3af" d="M0 0h1v40H0zM0 0h40v1H0z" fill-opacity="0.1"></path></svg>');
-        --bg-strategy-dark: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="%23475569" d="M0 0h1v40H0zM0 0h40v1H0z" fill-opacity="0.2"></path></svg>');
+        --bg-strategy-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3e%3cpath d='M0 10h100M10 0v100M0 50h100M50 0v100' fill='none' stroke='%23e2e8f0' stroke-width='1'/%3e%3ccircle cx='50' cy='50' r='20' fill='none' stroke='%23e2e8f0' stroke-width='1'/%3e%3ccircle cx='50' cy='50' r='40' fill='none' stroke='%23e2e8f0' stroke-width='1'/%3e%3c/svg%3e");
+        --bg-strategy-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3e%3cpath d='M0 10h100M10 0v100M0 50h100M50 0v100' fill='none' stroke='%23334155' stroke-width='1'/%3e%3ccircle cx='50' cy='50' r='20' fill='none' stroke='%23334155' stroke-width='1'/%3e%3ccircle cx='50' cy='50' r='40' fill='none' stroke='%23334155' stroke-width='1'/%3e%3c/svg%3e");
         background-image: var(--bg-strategy-light);
         opacity: 0; /* Hidden by default */
       }

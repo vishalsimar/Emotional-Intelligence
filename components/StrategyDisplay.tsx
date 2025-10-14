@@ -106,7 +106,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
         </button>
         <div className="flex items-center">
             <span className="text-4xl mr-3" aria-hidden="true">{emoji}</span>
-            <h2 className={`text-3xl sm:text-4xl font-bold ${headingColorClass}`}>
+            <h2 className={`text-3xl sm:text-4xl font-bold ${headingColorClass} font-serif`}>
                 Managing {name}
             </h2>
         </div>
