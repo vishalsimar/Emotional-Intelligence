@@ -70,44 +70,46 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onBack, onClearHisto
                 )}
             </header>
             
-            {dateKeys.length > 0 ? (
-                <div className="space-y-8">
-                    {dateKeys.map(dateString => (
-                        <section key={dateString} aria-labelledby={`date-heading-${dateString.replace(/\s/g, '-')}`}>
-                            <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2 border-b border-[var(--border-primary)]">
-                                {dateString}
-                            </h3>
-                            <ul className="space-y-3">
-                                {groupedHistory[dateString].map((log, index) => (
-                                    <li 
-                                        key={log.logId}
-                                        className="animate-fade-in-item"
-                                        style={{ animationDelay: `${index * 30}ms` }}
-                                    >
-                                        <div className={`bg-[var(--bg-secondary)] p-4 rounded-lg border-l-4 border-[var(--color-${log.emotionColor}-border)] shadow-sm flex items-center justify-between`}>
-                                            <div className="flex items-center space-x-4 flex-1">
-                                                <span className="text-3xl">{log.emotionEmoji}</span>
-                                                <div className="flex-1">
-                                                    <p className="font-semibold text-[var(--text-primary)]">{log.emotionName}</p>
+            <div className="max-w-2xl mx-auto w-full">
+                {dateKeys.length > 0 ? (
+                    <div className="space-y-8">
+                        {dateKeys.map(dateString => (
+                            <section key={dateString} aria-labelledby={`date-heading-${dateString.replace(/\s/g, '-')}`}>
+                                <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2 border-b border-[var(--border-primary)]">
+                                    {dateString}
+                                </h3>
+                                <ul className="space-y-3">
+                                    {groupedHistory[dateString].map((log, index) => (
+                                        <li 
+                                            key={log.logId}
+                                            className="animate-fade-in-item"
+                                            style={{ animationDelay: `${index * 30}ms` }}
+                                        >
+                                            <div className={`bg-[var(--bg-secondary)] p-4 rounded-lg border-l-4 border-[var(--color-${log.emotionColor}-border)] shadow-sm flex items-center justify-between`}>
+                                                <div className="flex items-center space-x-4 flex-1">
+                                                    <span className="text-3xl">{log.emotionEmoji}</span>
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold text-[var(--text-primary)]">{log.emotionName}</p>
+                                                    </div>
+                                                    <p className="text-sm text-[var(--text-secondary)] flex-shrink-0 ml-4">
+                                                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
                                                 </div>
-                                                <p className="text-sm text-[var(--text-secondary)] flex-shrink-0 ml-4">
-                                                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
                                             </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-20 px-4">
-                    <p className="text-4xl mb-4">🗂️</p>
-                    <h3 className="text-xl font-semibold text-[var(--text-primary)]/80">Your Journey Begins</h3>
-                    <p className="text-[var(--text-secondary)] mt-2">Log a feeling from the main screen to begin tracking your emotional journey.</p>
-                </div>
-            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 px-4">
+                        <p className="text-4xl mb-4">🗂️</p>
+                        <h3 className="text-xl font-semibold text-[var(--text-primary)]/80">Your Journey Begins</h3>
+                        <p className="text-[var(--text-secondary)] mt-2">Log a feeling from the main screen to begin tracking your emotional journey.</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

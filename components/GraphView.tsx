@@ -122,7 +122,7 @@ const GraphView: React.FC<GraphViewProps> = ({ history, onBack }) => {
                 </div>
             </header>
 
-            <div className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-lg shadow-md border border-[var(--border-primary)]">
+            <div className="bg-[var(--bg-secondary)] p-4 sm:p-6 rounded-lg shadow-md border border-[var(--border-primary)] max-w-4xl mx-auto">
                 <div className="flex justify-end mb-4">
                     <div className="flex items-center space-x-1 bg-[var(--bg-primary)] p-1 rounded-md">
                          <button 

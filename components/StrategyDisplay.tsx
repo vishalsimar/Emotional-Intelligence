@@ -32,7 +32,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const [visible, setVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
   const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
-  const [openSections, setOpenSections] = useState<Record<StrategyCategory, boolean>>({
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     immediate: true,
     shortTerm: false,
     longTerm: false,
@@ -54,7 +54,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     return () => clearTimeout(timer);
   }, [emotion]);
   
-  const toggleSection = (category: StrategyCategory) => {
+  const toggleSection = (category: StrategyCategory | 'helpingOthers') => {
     setOpenSections(prev => ({ ...prev, [category]: !prev[category] }));
   };
 
@@ -136,16 +136,15 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       </div>
 
       {activeTab === 'me' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-8 gap-y-6 animate-fade-in-content">
-          {STRATEGY_CATEGORIES_CONFIG.map(({ category, title, icon }, categoryIndex) => {
+        <div className="grid gap-6 max-w-2xl mx-auto w-full animate-fade-in-content">
+          {STRATEGY_CATEGORIES_CONFIG.map(({ category, title, icon }) => {
             const categoryStrategies = strategies[category];
-            const itemOffset = STRATEGY_CATEGORIES_CONFIG.slice(0, categoryIndex).reduce((acc, c) => acc + strategies[c.category].length, 0);
             
             return (
-              <div key={category} className="space-y-4">
+              <div key={category}>
                 <button 
                   onClick={() => toggleSection(category)}
-                  className="w-full flex justify-between items-center p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] lg:pointer-events-none lg:p-0 lg:bg-transparent lg:border-none transition-transform active:scale-95"
+                  className="w-full flex justify-between items-center p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] transition-transform active:scale-95"
                   aria-expanded={openSections[category]}
                   aria-controls={`section-${category}`}
                 >
@@ -153,32 +152,34 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                     <span className="mr-2">{icon}</span> {title}
                   </h3>
                    <span className="ml-2 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] text-xs font-semibold px-2 py-0.5 rounded-full">{categoryStrategies.length}</span>
-                  <ChevronDownIcon className={`w-6 h-6 text-[var(--text-secondary)] transition-transform lg:hidden ${openSections[category] ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon className={`w-6 h-6 text-[var(--text-secondary)] transition-transform ${openSections[category] ? 'rotate-180' : ''}`} />
                 </button>
                 <div 
                   id={`section-${category}`}
-                  className={`space-y-4 transition-all duration-300 ease-in-out overflow-hidden lg:block ${openSections[category] ? 'grid-open' : 'grid-closed'}`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${openSections[category] ? 'grid-open' : 'grid-closed'}`}
                 >
-                  {categoryStrategies.map((strategy, index) => (
-                      <StrategyCard
-                        key={strategy.id}
-                        strategy={strategy}
-                        emotionName={name}
-                        color={color}
-                        visible={visible}
-                        delay={(itemOffset + index) * 50}
-                        showControls={true}
-                        onMove={(direction) => handleMoveStrategy(category, index, direction)}
-                        checkedState={checkedSteps[strategy.id] || []}
-                        onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
-                        onReset={() => handleResetSteps(strategy.id)}
-                        onEdit={() => onEditStrategyClick(category, strategy)}
-                        onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
-                      />
-                  ))}
-                  <button onClick={() => onAddStrategyClick(category)} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
-                      <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
-                  </button>
+                  <div className="pt-4 space-y-4">
+                    {categoryStrategies.map((strategy, index) => (
+                        <StrategyCard
+                          key={strategy.id}
+                          strategy={strategy}
+                          emotionName={name}
+                          color={color}
+                          visible={visible}
+                          delay={index * 50}
+                          showControls={true}
+                          onMove={(direction) => handleMoveStrategy(category, index, direction)}
+                          checkedState={checkedSteps[strategy.id] || []}
+                          onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                          onReset={() => handleResetSteps(strategy.id)}
+                          onEdit={() => onEditStrategyClick(category, strategy)}
+                          onDelete={() => onDeleteStrategyClick(emotionId, category, strategy.id)}
+                        />
+                    ))}
+                    <button onClick={() => onAddStrategyClick(category)} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
+                        <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -187,7 +188,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       )}
 
       {activeTab === 'others' && (
-        <div className="space-y-6 animate-fade-in-content max-w-2xl">
+        <div className="space-y-6 animate-fade-in-content max-w-2xl mx-auto w-full">
            <h3 className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2">How to Support Someone Experiencing {name}</h3>
            {helpingOthers.map((strategy, index) => (
              <StrategyCard
@@ -230,12 +231,6 @@ style.innerHTML = `
     display: grid;
     grid-template-rows: 1fr;
     opacity: 1;
-}
-@media (min-width: 1024px) {
-    .grid-closed, .grid-open {
-        display: block;
-        opacity: 1;
-    }
 }
 `;
 document.head.appendChild(style);

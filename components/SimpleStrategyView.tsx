@@ -65,32 +65,34 @@ const SimpleStrategyView: React.FC<SimpleStrategyViewProps> = ({ title, emotionC
                 </h2>
             </header>
 
-            <div className="space-y-4">
-                {strategies.map((strategy, index) => (
-                    <StrategyCard
-                        key={strategy.id}
-                        strategy={strategy}
-                        emotionName={emotionName}
-                        color={emotionColor}
-                        visible={visible}
-                        delay={index * 50}
-                        showControls={true}
-                        checkedState={checkedSteps[strategy.id] || []}
-                        onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
-                        onReset={() => handleResetSteps(strategy.id)}
-                        onEdit={() => onEditStrategy(strategy.originEmotionId, strategy.originCategory, strategy)}
-                        onDelete={() => onDeleteStrategy(strategy.originEmotionId, strategy.originCategory, strategy.id)}
-                    />
-                ))}
-            </div>
-            
-            <div className="mt-12 text-center">
-                 <button 
-                    onClick={onFindMore}
-                    className="px-6 py-3 text-base font-medium text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)]"
-                >
-                    Explore More Options
-                </button>
+            <div className="max-w-2xl mx-auto w-full">
+                <div className="space-y-4">
+                    {strategies.map((strategy, index) => (
+                        <StrategyCard
+                            key={strategy.id}
+                            strategy={strategy}
+                            emotionName={emotionName}
+                            color={emotionColor}
+                            visible={visible}
+                            delay={index * 50}
+                            showControls={true}
+                            checkedState={checkedSteps[strategy.id] || []}
+                            onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                            onReset={() => handleResetSteps(strategy.id)}
+                            onEdit={() => onEditStrategy(strategy.originEmotionId, strategy.originCategory, strategy)}
+                            onDelete={() => onDeleteStrategy(strategy.originEmotionId, strategy.originCategory, strategy.id)}
+                        />
+                    ))}
+                </div>
+                
+                <div className="mt-12 text-center">
+                    <button 
+                        onClick={onFindMore}
+                        className="px-6 py-3 text-base font-medium text-[var(--text-on-accent)] bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] focus:ring-[var(--accent-ring)]"
+                    >
+                        Explore More Options
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -137,42 +137,44 @@ const JournalView: React.FC<JournalViewProps> = ({ entries, onSave, onDelete, on
                 </div>
             </header>
             
-            {dateKeys.length > 0 ? (
-                <div className="space-y-8">
-                    {dateKeys.map(dateString => (
-                        <section key={dateString} aria-labelledby={`date-heading-${dateString.replace(/\s/g, '-')}`}>
-                            <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2 border-b border-[var(--border-primary)]">
-                                {dateString}
-                            </h3>
-                            <ul className="space-y-3">
-                                {groupedEntries[dateString].map((entry, index) => (
-                                    <li key={entry.id} className="animate-fade-in-item" style={{ animationDelay: `${index * 30}ms` }}>
-                                        <button onClick={() => setEditingEntry(entry)} className="w-full text-left bg-[var(--bg-secondary)] p-4 rounded-lg shadow-sm hover:shadow-md hover:bg-[var(--bg-hover)] transition-all border border-[var(--border-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-semibold text-[var(--text-primary)]">{entry.title}</p>
-                                                    <p className="text-sm text-[var(--text-secondary)] mt-1 truncate max-w-xs sm:max-w-md">
-                                                        {entry.content.substring(0, 100) || 'No additional content.'}
+            <div className="max-w-2xl mx-auto w-full">
+                {dateKeys.length > 0 ? (
+                    <div className="space-y-8">
+                        {dateKeys.map(dateString => (
+                            <section key={dateString} aria-labelledby={`date-heading-${dateString.replace(/\s/g, '-')}`}>
+                                <h3 id={`date-heading-${dateString.replace(/\s/g, '-')}`} className="text-xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2 border-b border-[var(--border-primary)]">
+                                    {dateString}
+                                </h3>
+                                <ul className="space-y-3">
+                                    {groupedEntries[dateString].map((entry, index) => (
+                                        <li key={entry.id} className="animate-fade-in-item" style={{ animationDelay: `${index * 30}ms` }}>
+                                            <button onClick={() => setEditingEntry(entry)} className="w-full text-left bg-[var(--bg-secondary)] p-4 rounded-lg shadow-sm hover:shadow-md hover:bg-[var(--bg-hover)] transition-all border border-[var(--border-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="font-semibold text-[var(--text-primary)]">{entry.title}</p>
+                                                        <p className="text-sm text-[var(--text-secondary)] mt-1 truncate max-w-xs sm:max-w-md">
+                                                            {entry.content.substring(0, 100) || 'No additional content.'}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-sm text-[var(--text-secondary)] flex-shrink-0 ml-4">
+                                                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
                                                 </div>
-                                                <p className="text-sm text-[var(--text-secondary)] flex-shrink-0 ml-4">
-                                                    {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-20 px-4">
-                    <p className="text-4xl mb-4">✍️</p>
-                    <h3 className="text-xl font-semibold text-[var(--text-primary)]/80">Your Journal is Empty</h3>
-                    <p className="text-[var(--text-secondary)] mt-2">Press the plus button to write your first entry.</p>
-                </div>
-            )}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 px-4">
+                        <p className="text-4xl mb-4">✍️</p>
+                        <h3 className="text-xl font-semibold text-[var(--text-primary)]/80">Your Journal is Empty</h3>
+                        <p className="text-[var(--text-secondary)] mt-2">Press the plus button to write your first entry.</p>
+                    </div>
+                )}
+            </div>
             
             <button 
                 onClick={() => setEditingEntry({ title: '', content: ''})}
