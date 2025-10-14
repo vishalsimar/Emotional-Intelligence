@@ -63,6 +63,9 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ selectedThemeId, onThemeChang
         setIsOpen(false);
     }
 
+    const themeEntries = Object.entries(themes);
+    const firstDarkThemeIndex = themeEntries.findIndex(([, theme]) => theme.isDark);
+
     return (
         <div className="relative" ref={wrapperRef}>
             <button
@@ -75,22 +78,29 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ selectedThemeId, onThemeChang
                 <PaletteIcon />
             </button>
             {isOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-[var(--bg-secondary)] rounded-md shadow-lg border border-[var(--border-primary)] z-20">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-[var(--bg-secondary)] rounded-md shadow-lg border border-[var(--border-primary)] z-20">
                     <ul className="p-1" role="menu">
-                        {Object.entries(themes).map(([id, theme]) => (
-                            <li key={id}>
-                                <button
-                                    onClick={() => handleThemeSelect(id)}
-                                    className={`w-full text-left flex items-center justify-between px-3 py-2 text-sm rounded-md ${selectedThemeId === id ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}
-                                    role="menuitem"
-                                >
-                                    <div className="flex items-center space-x-2">
-                                        {theme.isDark ? <MoonIcon /> : <SunIcon />}
-                                        <span>{theme.name}</span>
-                                    </div>
-                                    {selectedThemeId === id && <CheckIcon />}
-                                </button>
-                            </li>
+                        {themeEntries.map(([id, theme], index) => (
+                            <React.Fragment key={id}>
+                                {index === firstDarkThemeIndex && firstDarkThemeIndex > 0 && (
+                                    <li className="my-1 px-2" role="separator">
+                                        <div className="h-px bg-[var(--border-primary)]" />
+                                    </li>
+                                )}
+                                <li>
+                                    <button
+                                        onClick={() => handleThemeSelect(id)}
+                                        className={`w-full text-left flex items-center justify-between px-3 py-2 text-sm rounded-md ${selectedThemeId === id ? 'bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}
+                                        role="menuitem"
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            {theme.isDark ? <MoonIcon /> : <SunIcon />}
+                                            <span>{theme.name}</span>
+                                        </div>
+                                        {selectedThemeId === id && <CheckIcon />}
+                                    </button>
+                                </li>
+                            </React.Fragment>
                         ))}
                     </ul>
                 </div>

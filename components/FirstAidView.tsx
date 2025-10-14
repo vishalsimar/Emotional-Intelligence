@@ -43,7 +43,7 @@ const FirstAidView: React.FC<FirstAidViewProps> = ({ onSelect, onBreathe, onBrow
                     style={{ transitionDelay: '300ms' }}
                 >
                     <BreatheIcon className="w-6 h-6" />
-                    <span>Just Breathe</span>
+                    <span>Help me breathe.</span>
                 </button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      <button
@@ -73,7 +73,7 @@ const FirstAidView: React.FC<FirstAidViewProps> = ({ onSelect, onBreathe, onBrow
                     className={`${baseClass} ${isRendered ? renderedClass : initialClass} w-full text-lg font-medium p-5 rounded-xl bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-ring)] ring-offset-[var(--bg-primary)] border border-[var(--border-primary)] active:scale-95 transition-transform`}
                     style={{ transitionDelay: '700ms' }}
                 >
-                    Browse All Feelings
+                    Explore More Feelings
                 </button>
             </div>
         </div>

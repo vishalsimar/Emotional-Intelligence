@@ -87,7 +87,7 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
     const handleShare = async (e: React.MouseEvent) => {
         e.stopPropagation();
         const stepsText = strategy.steps.map(step => `- ${step}`).join('\n');
-        const shareText = `Here's a strategy that might help when ${emotionName}:\n\n*${strategy.title}*\n\n${stepsText}\n\nShared from the Emotional Intelligence toolkit.`;
+        const shareText = `Here's a strategy that might help when ${emotionName}:\n\n*${strategy.title}*\n\n${stepsText}\n\nShared from the Emo Intel toolkit.`;
 
         if (navigator.share) {
             try {

@@ -89,9 +89,9 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   };
   
   const STRATEGY_CATEGORIES_CONFIG: { category: StrategyCategory; title: string; icon: string }[] = [
-    { category: "immediate", title: "Immediate", icon: "⚡️" },
-    { category: "shortTerm", title: "Short-Term", icon: "🗓️" },
-    { category: "longTerm", title: "Long-Term", icon: "🧠" },
+    { category: "immediate", title: "In the Moment", icon: "⚡️" },
+    { category: "shortTerm", title: "For Today", icon: "🗓️" },
+    { category: "longTerm", title: "Building Resilience", icon: "🧠" },
   ];
 
   return (

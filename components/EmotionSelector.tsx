@@ -144,7 +144,7 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
             </button>
             <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] font-serif">How are you feeling?</h2>
       </div>
-      <p className="text-[var(--text-secondary)] mb-8 text-center">Select a feeling to explore management strategies.</p>
+      <p className="text-[var(--text-secondary)] mb-8 text-center">Choose a feeling to understand it better.</p>
 
       <div className="w-full space-y-10 pb-20">
         {categories.map((category, catIndex) => (

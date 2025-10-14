@@ -92,10 +92,10 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, cate
   const getTitle = () => {
     if (!config) return '';
     if (config.type === 'emotion') {
-      return config.mode === 'add' ? 'Add New Emotion' : 'Edit Emotion';
+      return config.mode === 'add' ? 'Describe a New Feeling' : `Editing '${emotionData.name}'`;
     }
-    return config.mode === 'add' ? 'Add New Strategy' : 'Edit Strategy';
-  }
+    return config.mode === 'add' ? 'Create a New Strategy' : `Editing '${strategyData.title}'`;
+  };
 
   const renderEmotionForm = () => (
     <>
@@ -595,46 +595,42 @@ const App: React.FC = () => {
       <div className="min-h-screen w-full text-[var(--text-primary)] font-sans flex flex-col">
         <header className="w-full bg-[var(--bg-secondary)] shadow-sm sticky top-0 z-10 p-4 border-b border-[var(--border-primary)]">
           <div className="max-w-5xl mx-auto flex justify-between items-center h-10">
-            <div className={`flex-shrink-0 flex items-center space-x-1 font-medium ${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`} title={`${streak}-day streak`}>
-                <span className={`text-xl ${streak > 0 ? '' : 'grayscale'}`}>🔥</span>
-                <span className="text-sm">{streak}</span>
-            </div>
-            <div className="text-center flex-1 min-w-0 px-2">
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] truncate font-serif">
-                Emotional Intelligence
-              </h1>
-              <p className="text-[var(--text-secondary)] text-xs hidden sm:block">An emotional management toolkit.</p>
-            </div>
             <div className="flex-shrink-0 flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={() => setIsPhilosophyModalOpen(true)}
-                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="About this app"
               >
                 <InfoIcon />
               </button>
+              <ThemePicker selectedThemeId={themeId} onThemeChange={setThemeId} />
+              <div className={`flex items-center space-x-1 font-medium ${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`} title={`${streak}-day streak`}>
+                  <span className={`text-xl ${streak > 0 ? '' : 'grayscale'}`}>🔥</span>
+                  <span className="text-sm">{streak}</span>
+              </div>
+            </div>
+            <div className="flex-shrink-0 flex items-center space-x-1 sm:space-x-2">
                <button
                 onClick={() => setView('journal')}
-                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="View journal"
               >
                 <JournalIcon />
               </button>
               <button
                 onClick={() => setView('graph')}
-                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="View emotion trends"
               >
                 <GraphIcon />
               </button>
               <button
                 onClick={() => setView('history')}
-                className="flex-shrink-0 p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
+                className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] focus:ring-[var(--accent-ring)] transition-colors"
                 aria-label="View emotion history"
               >
                 <ClockIcon />
               </button>
-              <ThemePicker selectedThemeId={themeId} onThemeChange={setThemeId} />
             </div>
           </div>
         </header>
