@@ -18,10 +18,6 @@ const PlusIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>
-);
-
 export type StrategyCategory = 'immediate' | 'shortTerm' | 'longTerm';
 
 const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onReorderStrategies, onAddStrategyClick, onEditStrategyClick, onDeleteStrategyClick }) => {
@@ -32,11 +28,6 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const [visible, setVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
   const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    immediate: true,
-    shortTerm: false,
-    longTerm: false,
-  });
   
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
@@ -54,10 +45,6 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
     return () => clearTimeout(timer);
   }, [emotion]);
   
-  const toggleSection = (category: StrategyCategory | 'helpingOthers') => {
-    setOpenSections(prev => ({ ...prev, [category]: !prev[category] }));
-  };
-
   const handleToggleStep = (strategyId: string, stepIndex: number) => {
     setCheckedSteps(prev => {
       const newSteps = [...(prev[strategyId] || [])];
@@ -136,29 +123,24 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       </div>
 
       {activeTab === 'me' && (
-        <div className="grid gap-6 max-w-2xl mx-auto w-full animate-fade-in-content">
+        <div className="grid gap-8 max-w-2xl mx-auto w-full animate-fade-in-content">
           {STRATEGY_CATEGORIES_CONFIG.map(({ category, title, icon }) => {
             const categoryStrategies = strategies[category];
             
             return (
               <div key={category}>
-                <button 
-                  onClick={() => toggleSection(category)}
-                  className="w-full flex justify-between items-center p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] transition-transform active:scale-95"
-                  aria-expanded={openSections[category]}
-                  aria-controls={`section-${category}`}
+                <div 
+                  className="w-full flex justify-between items-center p-3 mb-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)]"
                 >
                   <h3 className="text-xl font-semibold text-[var(--text-primary)]/80 flex items-center">
                     <span className="mr-2">{icon}</span> {title}
                   </h3>
                    <span className="ml-2 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] text-xs font-semibold px-2 py-0.5 rounded-full">{categoryStrategies.length}</span>
-                  <ChevronDownIcon className={`w-6 h-6 text-[var(--text-secondary)] transition-transform ${openSections[category] ? 'rotate-180' : ''}`} />
-                </button>
+                </div>
                 <div 
                   id={`section-${category}`}
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${openSections[category] ? 'grid-open' : 'grid-closed'}`}
+                  className="space-y-4"
                 >
-                  <div className="pt-4 space-y-4">
                     {categoryStrategies.map((strategy, index) => (
                         <StrategyCard
                           key={strategy.id}
@@ -179,7 +161,6 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                     <button onClick={() => onAddStrategyClick(category)} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
                         <PlusIcon className="w-5 h-5 mr-2" /> Add Strategy
                     </button>
-                  </div>
                 </div>
               </div>
             );
@@ -222,16 +203,6 @@ style.innerHTML = `
 .animate-fade-in { animation: fade-in 0.3s ease-out-quad forwards; }
 @keyframes fade-in-content { 0% { opacity: 0; } 100% { opacity: 1; } }
 .animate-fade-in-content { animation: fade-in-content 0.4s ease-out-quad forwards; }
-.grid-closed {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-}
-.grid-open {
-    display: grid;
-    grid-template-rows: 1fr;
-    opacity: 1;
-}
 `;
 document.head.appendChild(style);
 

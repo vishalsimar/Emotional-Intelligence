@@ -50,24 +50,11 @@ const PlusIcon = ({ className }: { className?: string }) => (
 
 const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectEmotion, onReorder, onEditClick, onDeleteClick, onAddEmotionClick, onBack }) => {
   const [isRendered, setIsRendered] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => setIsRendered(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    setExpandedCategories(prev => {
-        const newState = { ...prev };
-        categories.forEach(cat => {
-            if (cat.isCollapsible && !(cat.id in newState)) {
-                newState[cat.id] = false; // Default new collapsible categories to collapsed
-            }
-        });
-        return newState;
-    });
-  }, [categories]);
 
   const handleMoveEmotion = (categoryId: string, index: number, direction: 'up' | 'down') => {
     const category = categories.find(c => c.id === categoryId);
@@ -82,10 +69,6 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
     [emotionsCopy[index], emotionsCopy[newIndex]] = [emotionsCopy[newIndex], emotionsCopy[index]];
 
     onReorder(categoryId, emotionsCopy);
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories(prev => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
 
   const EmotionCard: React.FC<{ emotion: Emotion; index: number; categoryId: string; isFirst: boolean; isLast: boolean; }> = ({ emotion, index, categoryId, isFirst, isLast }) => {
@@ -152,35 +135,26 @@ const EmotionSelector: React.FC<EmotionSelectorProps> = ({ categories, onSelectE
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-[var(--border-primary)]"></div></div>
               <div className="relative flex justify-center">
-                {category.isCollapsible ? (
-                  <button onClick={() => toggleCategory(category.id)} className="bg-[var(--bg-primary)] px-4 py-2 text-lg font-medium text-[var(--text-secondary)] rounded-full hover:bg-[var(--bg-hover)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] flex items-center" aria-expanded={expandedCategories[category.id]} aria-controls={`category-grid-${category.id}`}>
-                    {category.name}
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`ml-2 h-5 w-5 text-slate-500 transition-transform transform ${expandedCategories[category.id] ? 'rotate-180' : ''}`} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                  </button>
-                ) : (
-                  <h3 className="bg-[var(--bg-primary)] px-4 text-lg font-medium text-[var(--text-secondary)]">{category.name}</h3>
-                )}
+                <h3 className="bg-[var(--bg-primary)] px-4 text-lg font-medium text-[var(--text-secondary)]">{category.name}</h3>
               </div>
             </div>
 
-            {(!category.isCollapsible || expandedCategories[category.id]) && (
-                <div id={`category-grid-${category.id}`} className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
-                {category.emotions.map((emotion, index) => {
-                    const categoryEmotionsCount = category.emotions.length;
-                    return (
-                        <EmotionCard 
-                            key={emotion.id} 
-                            emotion={emotion} 
-                            index={index} 
-                            categoryId={category.id} 
-                            isFirst={index === 0}
-                            isLast={index === categoryEmotionsCount - 1}
-                        />
-                    );
-                })}
-                {catIndex === categories.length - 1 && <AddEmotionCard />}
-                </div>
-            )}
+            <div id={`category-grid-${category.id}`} className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
+            {category.emotions.map((emotion, index) => {
+                const categoryEmotionsCount = category.emotions.length;
+                return (
+                    <EmotionCard 
+                        key={emotion.id} 
+                        emotion={emotion} 
+                        index={index} 
+                        categoryId={category.id} 
+                        isFirst={index === 0}
+                        isLast={index === categoryEmotionsCount - 1}
+                    />
+                );
+            })}
+            {catIndex === categories.length - 1 && <AddEmotionCard />}
+            </div>
           </section>
         ))}
       </div>
