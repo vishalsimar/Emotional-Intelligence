@@ -6,9 +6,9 @@ interface StrategyDisplayProps {
   emotion: Emotion;
   onBack: () => void;
   onReorderStrategies: (emotionId: string, strategies: Emotion['strategies']) => void;
-  onAddStrategyClick: (category: StrategyCategory | 'helpingOthers') => void;
-  onEditStrategyClick: (category: StrategyCategory | 'helpingOthers', strategy: Strategy) => void;
-  onDeleteStrategyClick: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => void;
+  onAddStrategyClick: (category: StrategyCategory | 'helpingOthers' | 'relationshipRepair') => void;
+  onEditStrategyClick: (category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategy: Strategy) => void;
+  onDeleteStrategyClick: (emotionId: string, category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategyId: string) => void;
 }
 
 const PlusIcon = ({ className }: { className?: string }) => (
@@ -21,12 +21,12 @@ const PlusIcon = ({ className }: { className?: string }) => (
 export type StrategyCategory = 'immediate' | 'shortTerm' | 'longTerm';
 
 const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onReorderStrategies, onAddStrategyClick, onEditStrategyClick, onDeleteStrategyClick }) => {
-  const { id: emotionId, name, emoji, color, helpingOthers } = emotion;
+  const { id: emotionId, name, emoji, color, helpingOthers, relationshipRepair } = emotion;
   const strategies = emotion.strategies || { immediate: [], shortTerm: [], longTerm: [] };
   const headingColorClass = `text-[var(--color-${color}-text)]`;
 
   const [visible, setVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'me' | 'others'>('me');
+  const [activeTab, setActiveTab] = useState<'me' | 'others' | 'repair'>('me');
   const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
   
   useEffect(() => {
@@ -36,6 +36,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
       ...strategies.shortTerm,
       ...strategies.longTerm,
       ...emotion.helpingOthers,
+      ...(emotion.relationshipRepair || []),
     ];
     const initialCheckedState: Record<string, boolean[]> = {};
     allStrategies.forEach(strategy => {
@@ -54,7 +55,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   };
 
   const handleResetSteps = (strategyId: string) => {
-    const strategy = [...strategies.immediate, ...strategies.shortTerm, ...strategies.longTerm, ...helpingOthers].find(s => s.id === strategyId);
+    const strategy = [...strategies.immediate, ...strategies.shortTerm, ...strategies.longTerm, ...helpingOthers, ...(relationshipRepair || [])].find(s => s.id === strategyId);
     if (!strategy) return;
 
     setCheckedSteps(prev => ({
@@ -118,6 +119,15 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
             >
                 For Others
                 {activeTab === 'others' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-primary)]"></span>}
+            </button>
+             <button 
+                onClick={() => setActiveTab('repair')}
+                className={`px-4 py-3 text-sm sm:text-base font-semibold transition-all duration-200 ease-out-quad focus:outline-none relative transform active:scale-95
+                 ${activeTab === 'repair' ? `text-[var(--accent-primary)]` : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                aria-pressed={activeTab === 'repair'}
+            >
+                Relationship Repair
+                {activeTab === 'repair' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-primary)]"></span>}
             </button>
         </div>
       </div>
@@ -188,6 +198,31 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
               />
            ))}
             <button onClick={() => onAddStrategyClick('helpingOthers')} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
+                <PlusIcon className="w-5 h-5 mr-2" /> Add Tip
+            </button>
+        </div>
+      )}
+      
+      {activeTab === 'repair' && (
+        <div className="space-y-6 animate-fade-in-content max-w-2xl mx-auto w-full">
+           <h3 className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]/80 mb-4 pb-2">When You're the Cause of Their {name}</h3>
+           {(relationshipRepair || []).map((strategy, index) => (
+             <StrategyCard
+                key={strategy.id}
+                strategy={strategy}
+                emotionName={name}
+                color={color}
+                visible={visible}
+                delay={index * 50}
+                showControls={true}
+                checkedState={checkedSteps[strategy.id] || []}
+                onToggleStep={(stepIndex) => handleToggleStep(strategy.id, stepIndex)}
+                onReset={() => handleResetSteps(strategy.id)}
+                onEdit={() => onEditStrategyClick('relationshipRepair', strategy)}
+                onDelete={() => onDeleteStrategyClick(emotionId, 'relationshipRepair', strategy.id)}
+              />
+           ))}
+            <button onClick={() => onAddStrategyClick('relationshipRepair')} className="w-full flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--border-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent-ring)] transition-colors">
                 <PlusIcon className="w-5 h-5 mr-2" /> Add Tip
             </button>
         </div>

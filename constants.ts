@@ -30,6 +30,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho1-2', title: 'Give Them Space', steps: ['Ask if they need some time alone before talking.', 'Don\'t crowd them or physically block them.', 'Let them know you\'re there for them when they\'re ready to talk.'] },
       { id: 'ho1-3', title: 'Listen Without Defensiveness', steps: ['Avoid saying "You shouldn\'t be angry" or making excuses.', 'Listen to their perspective first, even if you disagree.', 'Focus on understanding their feelings before responding.'] },
     ],
+    relationshipRepair: [
+      { id: 'rr1-1', title: 'Acknowledge Their Feelings & Your Role', steps: ['Start by validating their anger: "I can see you\'re really angry, and you have a right to be."', 'Take responsibility for your part: "I realize what I did/said was hurtful, and I\'m sorry."', 'Avoid defensiveness. Do not say "but..." or explain your intentions yet. Just listen.'] },
+      { id: 'rr1-2', title: 'Offer a Sincere Apology', steps: ['A real apology has three parts: express remorse ("I\'m sorry"), take responsibility ("I was wrong to..."), and offer to make amends ("How can I make this right?").', 'Don\'t expect immediate forgiveness. Give them time and space to process.'] },
+      { id: 'rr1-3', title: 'Create a Plan for the Future', steps: ['Once you\'ve both calmed down, discuss what happened.', 'Talk about how you can handle similar situations differently in the future.', 'This shows you are committed to not repeating the mistake.'] },
+    ],
   },
   {
     id: 'emotion-2',
@@ -59,6 +64,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho2-1', title: 'Just Be Present', steps: ['You don\'t need to have the right words. Simply sitting with them in silence can be powerful.', 'Your non-judgmental presence shows you care.', 'Let them lead the conversation, if there is one.'] },
       { id: 'ho2-2', title: 'Listen Without \'Fixing\'', steps: ['Let them talk without interrupting.', 'Avoid giving unsolicited advice or saying "Look on the bright side."', 'The goal is to understand and validate, not to solve their problem.'] },
       { id: 'ho2-3', title: 'Offer Specific, Practical Help', steps: ['Instead of "Let me know if you need anything," try "Can I bring you dinner tonight?" or "I can walk your dog this afternoon."', 'This is easier for them to accept.' ] },
+    ],
+    relationshipRepair: [
+      { id: 'rr2-1', title: 'Validate Their Feelings', steps: ['Acknowledge their sadness without making excuses: "I can see that what I did really hurt you, and that makes me sad too."', 'Avoid downplaying their feelings by saying "It wasn\'t that bad."'] },
+      { id: 'rr2-2', title: 'Apologize for the Impact', steps: ['Focus your apology on the emotional impact your actions had.', 'Say "I am so sorry that my actions caused you to feel this way."', 'This is more effective than just apologizing for the action itself.'] },
+      { id: 'rr2-3', title: 'Offer Comfort, Then Space', steps: ['Ask if they need a hug, or just want you to listen.', 'Respect their answer. If they need space, let them know you\'re available whenever they\'re ready to talk.', 'Say: "I\'ll give you some space, but please know I\'m thinking of you and I\'m here when you\'re ready."'] },
     ],
   },
   {
@@ -90,6 +100,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho3-2', title: 'Help Them Ground Themselves', steps: ['Gently guide them to focus on the present.', 'You can use the 5-4-3-2-1 technique with them, or ask them to describe their immediate surroundings.', 'Slow, deep breathing with them can also help.'] },
       { id: 'ho3-3', title: 'Offer Reassurance of Safety', steps: ['Remind them that they are physically safe right now (if true).', 'Let them know you\'re with them and you\'re not going anywhere.', 'A calm and steady presence is very powerful.'] },
     ],
+    relationshipRepair: [
+      { id: 'rr3-1', title: 'Prioritize Their Safety', steps: ['Your first job is to help them feel safe again.', 'Ask, "What can I do to make you feel safer right now?"', 'Your actions to restore safety are more important than your words.'] },
+      { id: 'rr3-2', title: 'Validate Their Fear, Don\'t Debate It', steps: ['Acknowledge their reality: "I understand that what I did was frightening, and I\'m sorry for causing you to feel that way."', 'Do not argue about whether their fear was "rational." Their feeling is real.'] },
+      { id: 'rr3-3', title: 'Remove the Threat', steps: ['If your action is the source of fear (e.g. yelling, unpredictable behavior), stop it immediately.', 'If you can\'t, physically remove yourself from the situation until you can control your behavior.', 'Promise to work on not repeating the behavior.'] },
+    ],
   },
   {
     id: 'emotion-4',
@@ -119,6 +134,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho4-1', title: 'Be Genuinely Happy For Them', steps: ['Share in their excitement. Ask questions to hear more about their good news.', 'Your genuine enthusiasm will amplify their joy.', 'Mirror their positive energy.'] },
       { id: 'ho4-2', title: 'Celebrate With Them', steps: ['Don\'t downplay their achievement or change the subject.', 'Offer a sincere "Congratulations!" or "That\'s amazing news, tell me more!"', 'Let them have the spotlight.'] },
       { id: 'ho4-3', title: 'Avoid One-Upping', steps: ['Resist the urge to immediately share a similar, bigger story of your own.', 'Let this be their moment.', 'The focus should be entirely on their positive experience.'] },
+    ],
+    relationshipRepair: [
+      { id: 'rr4-1', title: 'Apologize for Diminishing Their Joy', steps: ['If you accidentally "rained on their parade," acknowledge it.', 'Say: "I\'m sorry, I realize my comment was negative when you were sharing good news. That wasn\'t fair to you."', 'Take ownership of your impact.'] },
+      { id: 'rr4-2', title: 'Re-Center the Conversation on Them', steps: ['Quickly shift the focus back to their happiness.', 'Ask an enthusiastic question: "So tell me again, what was the best part about it?"', 'Show you are genuinely interested and want to celebrate with them now.'] },
+      { id: 'rr4-3', title: 'Address Your Own Feelings Separately', steps: ['If their happiness triggered feelings of jealousy or sadness in you, that\'s okay.', 'Process those feelings on your own time or with another friend.', 'Don\'t make their happy moment about your difficult feelings.'] },
     ],
   },
   {
@@ -150,6 +170,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho5-2', title: 'Don\'t Force Engagement', steps: ['If they are disgusted by something, don\'t try to convince them it\'s not so bad.', 'Respect their boundary and help them create distance if needed.', 'Allow them to disengage from the trigger.'] },
       { id: 'ho5-3', title: 'Gently Shift Focus', steps: ['After acknowledging their feeling, you can try to change the topic or move to a different environment.', 'This can help them move past the immediate feeling.', 'Offer a distraction.'] },
     ],
+    relationshipRepair: [
+      { id: 'rr5-1', title: 'Acknowledge & Take Action', steps: ['Validate their reaction immediately: "You\'re right, this is gross/unacceptable. I\'m sorry."', 'Take immediate action to fix the situation (e.g., clean up the mess, stop the behavior).', 'Actions speak louder than words here.'] },
+      { id: 'rr5-2', title: 'Apologize for Crossing a Boundary', steps: ['Disgust is often about a violation of physical or moral boundaries.', 'Apologize specifically for that: "I\'m sorry, I wasn\'t thinking and I crossed a line. It won\'t happen again."'] },
+      { id: 'rr5-3', title: 'Discuss Expectations for the Future', steps: ['Once the moment has passed, have a calm conversation.', 'Clarify boundaries and expectations to prevent it from happening again.', 'Ask: "To make sure I don\'t do this again, can we talk about what the boundary is for you?"'] },
+    ],
   },
   {
     id: 'emotion-6',
@@ -179,6 +204,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho6-1', title: 'Stay Calm and Grounding', steps: ['Your calm presence can be very reassuring.', 'Help them take a deep breath with you.', 'This co-regulation can be very effective.'] },
       { id: 'ho6-2', title: 'Validate and Give Space', steps: ['Acknowledge the shock by saying "Wow, that\'s a lot to take in."', 'Ask if they need a minute to process before talking.', 'Don\'t rush them.'] },
       { id: 'ho6-3', title: 'Help Process Information', steps: ['Once the initial shock passes, help them make sense of it.', 'Ask open-ended questions like "How are you feeling about this?"', 'Listen without judgment.'] },
+    ],
+    relationshipRepair: [
+      { id: 'rr6-1', title: 'Acknowledge the Shock', steps: ['If your action caused a negative surprise, apologize for the shock first.', 'Say: "I can see that really shocked you. I\'m sorry I didn\'t handle that better."', 'Address the delivery before you address the content.'] },
+      { id: 'rr6-2', title: 'Provide Clarity and Context', steps: ['Explain the situation calmly and clearly, without being defensive.', 'Offer context that may have been missing.', 'Answer their questions honestly to help them make sense of the new information.'] },
+      { id: 'rr6-3', title: 'Give Them Time to Process', steps: ['Recognize that they may need time to adjust their worldview or expectations.', 'Don\'t pressure them to "get over it" quickly.', 'Offer to talk again later once they\'ve had time to think.'] },
     ],
   },
   {
@@ -210,6 +240,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho7-2', title: 'Help Them Externalize and Plan', steps: ['Ask, "What are all the things on your mind about this?"', 'Help them identify one small, actionable step they can take.', 'This shifts them from worrying to problem-solving.'] },
       { id: 'ho7-3', title: 'Offer a Healthy Distraction', steps: ['Suggest an engaging activity that is unrelated to the source of anticipation.', 'Going for a walk, watching a movie, or playing a game can provide a mental break.'] },
     ],
+    relationshipRepair: [
+      { id: 'rr7-1', title: 'Provide Clarity and Information', steps: ['If you created uncertainty, provide clear, honest information as soon as possible.', 'Apologize for the lack of clarity: "I\'m sorry for leaving you in suspense. Here is what I know for sure..."', 'Don\'t make promises you can\'t keep.'] },
+      { id: 'rr7-2', title: 'Reassure and Support', steps: ['Let them know you are on their team.', 'Say: "Whatever happens, we will face it together."', 'Offer practical support to help them prepare for the event they are anticipating.'] },
+      { id: 'rr7-3', title: 'Take Responsibility for Ambiguity', steps: ['Acknowledge that you created a stressful situation for them.', 'Even if it was unintentional, apologize for the impact: "I realize that by not being clear, I caused you a lot of unnecessary stress, and I\'m sorry for that."'] },
+    ],
   },
   {
     id: 'emotion-8',
@@ -239,6 +274,11 @@ const ALL_EMOTIONS: Emotion[] = [
       { id: 'ho8-1', title: 'Be Consistent and Dependable', steps: ['Your actions are the most powerful trust-building tool.', 'Show up when you say you will. Follow through on your promises.', 'Reliability is the bedrock of trust.'] },
       { id: 'ho8-2', title: 'Respect Their Pace and Boundaries', steps: ['If someone has been hurt, they may be slow to trust.', 'Do not push for more vulnerability than they are ready to offer.', 'Let them control the pace of the relationship.'] },
       { id: 'ho8-3', title: 'Listen Without Judgment', steps: ['Create a safe emotional space for them to share their fears or past experiences.', 'Listen to understand, not to fix or rebut.', 'Your non-judgmental acceptance can be incredibly healing.'] },
+    ],
+    relationshipRepair: [
+      { id: 'rr8-1', title: 'Take Full Responsibility', steps: ['If you broke their trust, own your actions completely. No excuses, no blaming.', 'Say "I was wrong, and I have no excuse for my behavior."', 'This is the non-negotiable first step.'] },
+      { id: 'rr8-2', title: 'Allow Them to Express Their Pain', steps: ['Give them the space to tell you exactly how you hurt them.', 'Listen without defending yourself. Your job is to understand the full impact of your actions on them.', 'Validate their pain: "It makes sense you feel that way. I would too."'] },
+      { id: 'rr8-3', title: 'Rebuild with Actions, Not Words', steps: ['Trust is rebuilt through consistent, trustworthy behavior over time.', 'Be transparent. Be reliable. Keep your promises.', 'Understand that rebuilding trust is a marathon, not a sprint, and it\'s on their timeline, not yours.'] },
     ],
   },
 ];

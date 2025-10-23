@@ -5,7 +5,7 @@ import { Strategy } from '../types';
 import StrategyCard from './StrategyCard';
 import { StrategyCategory } from './StrategyDisplay';
 
-type StrategyWithOrigin = Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' };
+type StrategyWithOrigin = Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' | 'relationshipRepair' };
 
 interface SimpleStrategyViewProps {
     title: string;
@@ -14,8 +14,8 @@ interface SimpleStrategyViewProps {
     strategies: StrategyWithOrigin[];
     onBack: () => void;
     onFindMore: () => void;
-    onEditStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategy: Strategy) => void;
-    onDeleteStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => void;
+    onEditStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategy: Strategy) => void;
+    onDeleteStrategy: (emotionId: string, category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategyId: string) => void;
 }
 
 const SimpleStrategyView: React.FC<SimpleStrategyViewProps> = ({ title, emotionColor, emotionName, strategies, onBack, onFindMore, onEditStrategy, onDeleteStrategy }) => {

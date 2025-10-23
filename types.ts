@@ -17,6 +17,7 @@ export interface Emotion {
     longTerm: Strategy[];
   };
   helpingOthers: Strategy[];
+  relationshipRepair: Strategy[];
 }
 
 export interface EmotionCategory {

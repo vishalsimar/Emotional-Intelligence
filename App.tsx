@@ -19,8 +19,8 @@ type PlacementInfo = { type: 'existing' | 'new'; categoryId: string; categoryNam
 export type ModalConfig = 
   | { type: 'emotion'; mode: 'add' }
   | { type: 'emotion'; mode: 'edit'; emotion: Emotion }
-  | { type: 'strategy'; mode: 'add'; emotionId: string; category: StrategyCategory | 'helpingOthers' }
-  | { type: 'strategy'; mode: 'edit'; emotionId: string; category: StrategyCategory | 'helpingOthers'; strategy: Strategy };
+  | { type: 'strategy'; mode: 'add'; emotionId: string; category: StrategyCategory | 'helpingOthers' | 'relationshipRepair' }
+  | { type: 'strategy'; mode: 'edit'; emotionId: string; category: StrategyCategory | 'helpingOthers' | 'relationshipRepair'; strategy: Strategy };
 
 interface EditorModalProps {
   config: ModalConfig | null;
@@ -32,7 +32,7 @@ interface EditorModalProps {
 const emotionColors = ['red', 'blue', 'purple', 'yellow', 'green', 'orange', 'slate', 'teal', 'indigo', 'stone', 'lime', 'rose', 'cyan', 'sky'];
 
 const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, categories }) => {
-  const [emotionData, setEmotionData] = useState<Omit<Emotion, 'strategies' | 'helpingOthers'>>({ id: '', name: '', emoji: '', color: 'blue', description: '', relatedWords: [] });
+  const [emotionData, setEmotionData] = useState<Omit<Emotion, 'strategies' | 'helpingOthers' | 'relationshipRepair'>>({ id: '', name: '', emoji: '', color: 'blue', description: '', relatedWords: [] });
   const [strategyData, setStrategyData] = useState<Omit<Strategy, 'id'>>({ title: '', steps: [] });
   const [relatedWordsStr, setRelatedWordsStr] = useState('');
   const [stepsStr, setStepsStr] = useState('');
@@ -45,7 +45,7 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, cate
 
   useEffect(() => {
     if (config?.type === 'emotion' && config.mode === 'edit') {
-      const { strategies, helpingOthers, ...data } = config.emotion;
+      const { strategies, helpingOthers, relationshipRepair, ...data } = config.emotion;
       setEmotionData(data);
       setRelatedWordsStr(data.relatedWords.join(', '));
     } else if (config?.type === 'emotion' && config.mode === 'add') {
@@ -79,6 +79,7 @@ const EditorModal: React.FC<EditorModalProps> = ({ config, onSave, onClose, cate
         // Keep existing strategies when editing
         strategies: (config.mode === 'edit' ? config.emotion.strategies : { immediate: [], shortTerm: [], longTerm: [] }),
         helpingOthers: (config.mode === 'edit' ? config.emotion.helpingOthers : []),
+        relationshipRepair: (config.mode === 'edit' ? config.emotion.relationshipRepair : []),
       }, placement);
     } else { // strategy
       onSave({ 
@@ -335,12 +336,12 @@ const App: React.FC = () => {
       const anger = allEmotions.find(e => e.name === 'Anger');
       const fear = allEmotions.find(e => e.name === 'Fear');
       const anticipation = allEmotions.find(e => e.name === 'Anticipation');
-      let strategies: (Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' })[] = [];
+      let strategies: (Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' | 'relationshipRepair' })[] = [];
       if (anger) strategies.push(...anger.strategies.immediate.map(s => ({ ...s, originEmotionId: anger.id, originCategory: 'immediate' as const })));
       if (fear) strategies.push(...fear.strategies.immediate.map(s => ({ ...s, originEmotionId: fear.id, originCategory: 'immediate' as const })));
       if (anticipation) strategies.push(...anticipation.strategies.immediate.map(s => ({ ...s, originEmotionId: anticipation.id, originCategory: 'immediate' as const })));
       
-      const uniqueStrategies = strategies.reduce<(Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' })[]>((acc, current) => {
+      const uniqueStrategies = strategies.reduce<(Strategy & { originEmotionId: string; originCategory: StrategyCategory | 'helpingOthers' | 'relationshipRepair' })[]>((acc, current) => {
           if (!acc.some(item => item.title === current.title)) {
               acc.push(current);
           }
@@ -405,7 +406,7 @@ const App: React.FC = () => {
 
 
   // --- CRUD Handlers ---
-  const handleEditStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers', strategy: Strategy) => {
+  const handleEditStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategy: Strategy) => {
     setModalConfig({ type: 'strategy', mode: 'edit', emotionId, category, strategy });
   };
   
@@ -421,7 +422,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDeleteStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers', strategyId: string) => {
+  const handleDeleteStrategy = (emotionId: string, category: StrategyCategory | 'helpingOthers' | 'relationshipRepair', strategyId: string) => {
      if (window.confirm('Are you sure you want to delete this strategy?')) {
         const newEmotionCategories = emotionCategories.map(cat => ({
             ...cat,
@@ -430,6 +431,8 @@ const App: React.FC = () => {
                     const updatedEmotion = { ...e };
                     if (category === 'helpingOthers') {
                         updatedEmotion.helpingOthers = updatedEmotion.helpingOthers.filter(s => s.id !== strategyId);
+                    } else if (category === 'relationshipRepair') {
+                        updatedEmotion.relationshipRepair = updatedEmotion.relationshipRepair.filter(s => s.id !== strategyId);
                     } else {
                         updatedEmotion.strategies = {
                             ...updatedEmotion.strategies,
@@ -486,7 +489,14 @@ const App: React.FC = () => {
         emotions: cat.emotions.map(e => {
           if (e.id === emotionId) {
             const updatedEmotion = JSON.parse(JSON.stringify(e)); // Deep copy
-            const list = category === 'helpingOthers' ? updatedEmotion.helpingOthers : updatedEmotion.strategies[category];
+            let list: Strategy[];
+            if (category === 'helpingOthers') {
+                list = updatedEmotion.helpingOthers;
+            } else if (category === 'relationshipRepair') {
+                list = updatedEmotion.relationshipRepair;
+            } else {
+                list = updatedEmotion.strategies[category];
+            }
             
             if (modalConfig.mode === 'add') {
               list.push({ ...strategyData, id: `strategy-${Date.now()}` });
