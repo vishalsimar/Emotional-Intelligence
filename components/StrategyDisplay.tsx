@@ -20,6 +20,29 @@ const PlusIcon = ({ className }: { className?: string }) => (
 
 export type StrategyCategory = 'immediate' | 'shortTerm' | 'longTerm';
 
+const getTabLabels = (emotionName: string) => {
+    switch (emotionName.toLowerCase()) {
+        case 'anger':
+            return { me: "I'm Angry", others: "Someone is Angry", repair: "I Angered Someone" };
+        case 'sadness':
+            return { me: "I'm Sad", others: "Someone is Sad", repair: "I Caused Sadness" };
+        case 'fear':
+            return { me: "I'm Scared", others: "Someone is Scared", repair: "I Scared Someone" };
+        case 'happiness':
+            return { me: "I'm Happy", others: "Celebrating with Someone", repair: "I Diminished Their Joy" };
+        case 'disgust':
+            return { me: "I'm Disgusted", others: "Someone is Disgusted", repair: "I Caused Disgust" };
+        case 'surprise':
+            return { me: "I'm Surprised", others: "Someone is Surprised", repair: "I Caused a Bad Surprise" };
+        case 'anticipation':
+            return { me: "I'm Feeling Anticipation", others: "Someone is Anticipating", repair: "I Caused Anxiety" };
+        case 'trust':
+            return { me: "Building Self-Trust", others: "Earning Someone's Trust", repair: "I Broke Their Trust" };
+        default:
+            return { me: `Managing ${emotionName}`, others: `Helping with ${emotionName}`, repair: `Relationship Repair` };
+    }
+};
+
 const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onReorderStrategies, onAddStrategyClick, onEditStrategyClick, onDeleteStrategyClick }) => {
   const { id: emotionId, name, emoji, color, helpingOthers, relationshipRepair } = emotion;
   const strategies = emotion.strategies || { immediate: [], shortTerm: [], longTerm: [] };
@@ -29,6 +52,8 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
   const [activeTab, setActiveTab] = useState<'me' | 'others' | 'repair'>('me');
   const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean[]>>({});
   
+  const tabLabels = getTabLabels(name);
+
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);
     const allStrategies = [
@@ -108,7 +133,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                 ${activeTab === 'me' ? `text-[var(--accent-primary)]` : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 aria-pressed={activeTab === 'me'}
             >
-                For Myself
+                {tabLabels.me}
                 {activeTab === 'me' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-primary)]"></span>}
             </button>
             <button 
@@ -117,7 +142,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                  ${activeTab === 'others' ? `text-[var(--accent-primary)]` : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 aria-pressed={activeTab === 'others'}
             >
-                For Others
+                {tabLabels.others}
                 {activeTab === 'others' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-primary)]"></span>}
             </button>
              <button 
@@ -126,7 +151,7 @@ const StrategyDisplay: React.FC<StrategyDisplayProps> = ({ emotion, onBack, onRe
                  ${activeTab === 'repair' ? `text-[var(--accent-primary)]` : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 aria-pressed={activeTab === 'repair'}
             >
-                Relationship Repair
+                {tabLabels.repair}
                 {activeTab === 'repair' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-primary)]"></span>}
             </button>
         </div>
