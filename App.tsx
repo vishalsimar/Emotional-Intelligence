@@ -243,16 +243,70 @@ const InfoIcon = () => (
 
 type View = 'firstAid' | 'selector' | 'strategy' | 'quickStrategy' | 'history' | 'graph' | 'breathe' | 'journal';
 
+// Data hydration function to merge saved data with defaults, ensuring data structures are up to date.
+const loadAndMigrateEmotions = (): EmotionCategory[] => {
+  try {
+    const saved = localStorage.getItem('emotionCategories');
+    const categoriesToProcess: EmotionCategory[] = saved ? JSON.parse(saved) : EMOTION_CATEGORIES;
+
+    // Create a map of all default emotions for easy lookup.
+    const defaultEmotionsMap = new Map<string, Emotion>();
+    EMOTION_CATEGORIES.forEach(cat => 
+        cat.emotions.forEach(emo => defaultEmotionsMap.set(emo.id, emo))
+    );
+
+    // 1. Migrate existing emotions:
+    // Go through saved categories and ensure each emotion has all the properties from its default version.
+    const migratedCategories = categoriesToProcess.map(category => ({
+      ...category,
+      emotions: category.emotions.map(emotion => {
+        const defaultEmotion = defaultEmotionsMap.get(emotion.id);
+        if (defaultEmotion) {
+          // Merge the default structure with the saved emotion.
+          // This adds new top-level properties (like relationshipRepair) if they're missing
+          // while preserving user's customizations in nested properties like 'strategies'.
+          return {
+            ...defaultEmotion,
+            ...emotion,
+          };
+        }
+        // It's a user-created emotion. Ensure it has a fallback structure to be safe.
+        return {
+          strategies: { immediate: [], shortTerm: [], longTerm: [] },
+          helpingOthers: [],
+          relationshipRepair: [],
+          ...emotion,
+        };
+      }),
+    }));
+    
+    // 2. Add new emotions from codebase that the user doesn't have:
+    const savedEmotionsSet = new Set<string>();
+    migratedCategories.forEach(cat => cat.emotions.forEach(emo => savedEmotionsSet.add(emo.id)));
+    
+    EMOTION_CATEGORIES.forEach(defaultCategory => {
+        const categoryToAddTo = migratedCategories.find(c => c.id === defaultCategory.id);
+        if (categoryToAddTo) { // Find the matching category in the user's data
+            defaultCategory.emotions.forEach(defaultEmotion => {
+                if (!savedEmotionsSet.has(defaultEmotion.id)) {
+                    // This is a new default emotion, add it to the user's list.
+                    categoryToAddTo.emotions.push(defaultEmotion);
+                }
+            });
+        }
+    });
+
+    return migratedCategories;
+
+  } catch (error) {
+    console.error("Failed to parse or migrate emotion categories from localStorage. Resetting to defaults.", error);
+    // If anything goes wrong, it's safest to return the defaults.
+    return EMOTION_CATEGORIES;
+  }
+};
+
 const App: React.FC = () => {
-  const [emotionCategories, setEmotionCategories] = useState<EmotionCategory[]>(() => {
-    try {
-      const saved = localStorage.getItem('emotionCategories');
-      return saved ? JSON.parse(saved) : EMOTION_CATEGORIES;
-    } catch (error) {
-      console.error("Failed to parse emotion categories from localStorage", error);
-      return EMOTION_CATEGORIES;
-    }
-  });
+  const [emotionCategories, setEmotionCategories] = useState<EmotionCategory[]>(loadAndMigrateEmotions);
   const [history, setHistory] = useState<EmotionLog[]>(() => {
     try {
       const savedHistory = localStorage.getItem('emotionHistory');
