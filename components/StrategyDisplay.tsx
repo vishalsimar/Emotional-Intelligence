@@ -35,7 +35,7 @@ const getTabLabels = (emotionName: string) => {
         case 'surprise':
             return { me: "I'm Surprised", others: "Someone is Surprised", repair: "I Caused a Bad Surprise" };
         case 'anticipation':
-            return { me: "I'm Feeling Anticipation", others: "Someone is Anticipating", repair: "I Caused Anxiety" };
+            return { me: "I'm Feeling Anticipation", others: "Someone is Anticipating", repair: "I Caused Anticipation" };
         case 'trust':
             return { me: "Building Self-Trust", others: "Earning Someone's Trust", repair: "I Broke Their Trust" };
         default:

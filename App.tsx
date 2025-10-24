@@ -247,56 +247,67 @@ type View = 'firstAid' | 'selector' | 'strategy' | 'quickStrategy' | 'history' |
 const loadAndMigrateEmotions = (): EmotionCategory[] => {
   try {
     const saved = localStorage.getItem('emotionCategories');
-    const categoriesToProcess: EmotionCategory[] = saved ? JSON.parse(saved) : EMOTION_CATEGORIES;
+    if (!saved) return EMOTION_CATEGORIES;
+    
+    const savedCategories: EmotionCategory[] = JSON.parse(saved);
 
-    // Create a map of all default emotions for easy lookup.
     const defaultEmotionsMap = new Map<string, Emotion>();
-    EMOTION_CATEGORIES.forEach(cat => 
-        cat.emotions.forEach(emo => defaultEmotionsMap.set(emo.id, emo))
-    );
-
-    // 1. Migrate existing emotions:
-    // Go through saved categories and ensure each emotion has all the properties from its default version.
-    const migratedCategories = categoriesToProcess.map(category => ({
-      ...category,
-      emotions: category.emotions.map(emotion => {
-        const defaultEmotion = defaultEmotionsMap.get(emotion.id);
-        if (defaultEmotion) {
-          // Merge the default structure with the saved emotion.
-          // This adds new top-level properties (like relationshipRepair) if they're missing
-          // while preserving user's customizations in nested properties like 'strategies'.
+    EMOTION_CATEGORIES.forEach(cat => cat.emotions.forEach(emo => defaultEmotionsMap.set(emo.id, emo)));
+    
+    // Deep merge saved categories with defaults to ensure data structure is current
+    const mergedCategories = EMOTION_CATEGORIES.map(defaultCategory => {
+      const savedCategory = savedCategories.find(c => c.id === defaultCategory.id);
+      // If user has no data for this category, just return the default.
+      if (!savedCategory) return defaultCategory;
+      
+      const savedEmotionsMap = new Map<string, Emotion>(savedCategory.emotions.map(e => [e.id, e]));
+      
+      // Get a unique set of all emotion IDs from both default and saved data for this category.
+      const allEmotionIds = new Set([...defaultCategory.emotions.map(e => e.id), ...savedCategory.emotions.map(e => e.id)]);
+      
+      const mergedEmotions = Array.from(allEmotionIds).map(emotionId => {
+        const defaultEmotion = defaultEmotionsMap.get(emotionId);
+        const savedEmotion = savedEmotionsMap.get(emotionId);
+        
+        if (defaultEmotion && savedEmotion) {
+          // Emotion exists in both: merge them carefully to preserve user edits while adding new fields.
+          const savedStrategies = savedEmotion.strategies || {};
           return {
-            ...defaultEmotion,
-            ...emotion,
+            ...defaultEmotion, // Start with default as a base
+            ...savedEmotion,   // Overwrite with any user customizations
+            strategies: {      // Explicitly merge the nested strategies object
+              ...defaultEmotion.strategies,
+              ...savedStrategies,
+            },
+            // Use saved array if it exists (even if empty), otherwise fallback to default. Protects against null.
+            helpingOthers: savedEmotion.helpingOthers ?? defaultEmotion.helpingOthers,
+            relationshipRepair: savedEmotion.relationshipRepair ?? defaultEmotion.relationshipRepair,
+          };
+        } else if (savedEmotion) {
+          // User-created emotion: ensure it has the full, modern structure.
+          return {
+            strategies: { immediate: [], shortTerm: [], longTerm: [] },
+            helpingOthers: [],
+            relationshipRepair: [],
+            ...savedEmotion,
           };
         }
-        // It's a user-created emotion. Ensure it has a fallback structure to be safe.
-        return {
-          strategies: { immediate: [], shortTerm: [], longTerm: [] },
-          helpingOthers: [],
-          relationshipRepair: [],
-          ...emotion,
-        };
-      }),
-    }));
-    
-    // 2. Add new emotions from codebase that the user doesn't have:
-    const savedEmotionsSet = new Set<string>();
-    migratedCategories.forEach(cat => cat.emotions.forEach(emo => savedEmotionsSet.add(emo.id)));
-    
-    EMOTION_CATEGORIES.forEach(defaultCategory => {
-        const categoryToAddTo = migratedCategories.find(c => c.id === defaultCategory.id);
-        if (categoryToAddTo) { // Find the matching category in the user's data
-            defaultCategory.emotions.forEach(defaultEmotion => {
-                if (!savedEmotionsSet.has(defaultEmotion.id)) {
-                    // This is a new default emotion, add it to the user's list.
-                    categoryToAddTo.emotions.push(defaultEmotion);
-                }
-            });
-        }
+        // New default emotion user doesn't have yet: just return it.
+        return defaultEmotion;
+      }).filter((e): e is Emotion => e !== undefined); // Filter out any potential undefineds
+      
+      // Combine category properties, preferring saved ones, and use the merged emotions list.
+      return { ...defaultCategory, ...savedCategory, emotions: mergedEmotions };
     });
 
-    return migratedCategories;
+    // Add any custom categories the user created that aren't in the defaults.
+    savedCategories.forEach(savedCategory => {
+      if (!mergedCategories.some(c => c.id === savedCategory.id)) {
+        mergedCategories.push(savedCategory);
+      }
+    });
+
+    return mergedCategories;
 
   } catch (error) {
     console.error("Failed to parse or migrate emotion categories from localStorage. Resetting to defaults.", error);
