@@ -1,4 +1,4 @@
-const CACHE_NAME = 'emotional-intelligence-v1';
+const CACHE_NAME = 'feel-better-v1';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',

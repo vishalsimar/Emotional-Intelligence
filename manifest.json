@@ -1,8 +1,8 @@
 
 {
-  "name": "Emo Intel",
-  "short_name": "Emotions",
-  "description": "An emotional management toolkit. Understand your feelings and learn evidence-based strategies to navigate them effectively.",
+  "name": "Feel Better",
+  "short_name": "Feel Better",
+  "description": "A toolkit to help you feel better. Understand your feelings and learn evidence-based strategies to navigate them effectively.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
