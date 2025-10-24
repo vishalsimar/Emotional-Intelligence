@@ -220,9 +220,9 @@ const ALL_EMOTIONS: Emotion[] = [
     relatedWords: ['Expectation', 'Excitement', 'Dread', 'Suspense'],
     strategies: {
       immediate: [
-        { id: 's7-1', title: 'Mindful Breathing', steps: ['Focus on the physical sensation of your breath.', 'Breathe in for 4, hold for 4, out for 6.', 'This anchors you in the present, away from future worries.'] },
+        { id: 's7-1', title: 'Describe Your Environment', steps: ['Look around you.', 'Name 5 non-judgmental facts about your surroundings.', "For example: 'The wall is white. The desk is made of wood. I hear a fan.'", "This shifts your focus from internal worry to external reality."] },
         { id: 's7-2', title: 'Challenge Catastrophic Thinking', steps: ['Ask yourself: "What is the worst that could happen?"', '"What is the best?"', '"What is most likely to happen?"', 'This CBT technique provides perspective.'] },
-        { id: 's7-3', title: 'Engage Your Senses', steps: ['Use the 5-4-3-2-1 grounding technique.', 'Notice 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.', 'This pulls your focus from anxious thoughts to your immediate environment.'] },
+        { id: 's7-3', title: '5-4-3-2-1 Grounding', steps: ['Name 5 things you can see.', 'Name 4 things you can physically feel.', 'Name 3 things you can hear.', 'Name 2 things you can smell.', 'Name 1 thing you can taste.'] },
       ],
       shortTerm: [
         { id: 's7-4', title: 'Channel Energy into Planning', steps: ['If feeling excited, create a plan or checklist.', 'If feeling anxious, identify one small, controllable preparatory step.', 'Action provides a sense of agency and reduces helplessness.'] },
